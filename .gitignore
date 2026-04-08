@@ -3,10 +3,7 @@
 # ================================
 bin/
 obj/
-*.user
-.vs/
-*.suo
-*.cache
+
 
 # ================================
 # Claude Code (không đẩy lên GitHub)
@@ -16,23 +13,3 @@ CLAUDE.md
 CONTEXT.md
 SESSION_LOG.md
 
-# ================================
-# OS
-# ================================
-.DS_Store
-Thumbs.db
-
-# ================================
-# IDE
-# ================================
-*.rsuser
-*.userosscache
-*.sln.docstates
-.idea/
-
-# ================================
-# NuGet
-# ================================
-*.nupkg
-packages/
-project.lock.json
