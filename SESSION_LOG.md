@@ -4,6 +4,97 @@
 
 ---
 
+## Session 2026-04-09 (2) — Triển khai Import IDW + Import JSON
+
+### Đã làm
+
+**Triển khai 2 tính năng mới cho FittingManagement module:**
+
+1. **Import IDW (Inventor COM Interop)** — `Services/FittingManagement/Import/FittingManagementService.IdwImport.cs` (MỚI)
+   - Dùng late-binding COM (`Marshal.GetActiveObject` / `Activator.CreateInstance`) để kết nối Inventor
+   - Trích xuất iProperties: PartNumber, Description, Revision, Mass, Material, Designer, Title
+   - Duyệt Sheets → DrawingViews → ViewMetadata
+   - Export DWG qua Inventor DWG Translator Add-In (GUID: `{C24E3AC2-122E-11D5-8E91-0010B541CD80}`)
+   - Lưu FittingMetadata ra JSON vào `C:\Temp_BIM_Library`
+
+2. **Import JSON + Tạo Block + Catalog** — `Services/FittingManagement/Import/FittingManagementService.JsonImport.cs` (MỚI)
+   - Đọc JSON → FittingMetadata, tìm DWG cùng tên
+   - Tạo block definition qua `Database.Insert()` từ side database
+   - Inject 7 attributes: PART_ID, DESC, MASS, MATERIAL, REVISION, BOM_TYPE, POS_NUM
+   - Map layer: PANEL → `MCG_Fitting_Panel` (blue), DETAIL → `MCG_Fitting_Detail` (red)
+   - Đăng ký vào MasterCatalog.json qua `MergeItemsToJson()`
+
+**Files đã sửa:**
+- `Services/FittingManagement/IFittingManagementService.cs` — Thêm 2 method signatures
+- `Views/FittingManagement/FittingManagementView.xaml.cs` — Thay 2 stub MessageBox bằng OpenFileDialog + gọi service
+
+**Files đã tạo:**
+- `Services/FittingManagement/Import/FittingManagementService.IdwImport.cs`
+- `Services/FittingManagement/Import/FittingManagementService.JsonImport.cs`
+
+### Trạng thái
+
+- **Phase:** 1 — Feature Implementation
+- Build succeeded — 0 errors
+- Step 1 (Import IDW) và Step 2 (Import JSON) đã hoạt động
+
+### Bước tiếp theo
+
+1. Test thực tế: Load plugin vào AutoCAD → MCG_Show → Fitting tab → Import .idw files (cần Inventor)
+2. Test Import JSON: Chọn JSON + DWG pair → kiểm tra block + catalog
+
+### Ghi chú API
+
+- **Inventor COM late-binding**: Dùng `dynamic` + `Type.GetTypeFromProgID("Inventor.Application")` — không cần reference DLL, không sửa .csproj
+- **DWG Translator Add-In GUID**: `{C24E3AC2-122E-11D5-8E91-0010B541CD80}` — chuẩn cho tất cả phiên bản Inventor
+- **Inventor iProperties path**: `PropertySets["Design Tracking Properties"]` chứa PartNumber, Description, Mass, Material; `PropertySets["Inventor Summary Information"]` chứa Title
+- **Mass property**: Inventor trả về `double`, cần convert `.ToString("F3")`
+- **COM lifecycle**: Track `weStartedInventor` flag — chỉ `Quit()` nếu ta khởi tạo, tránh kill session đang chạy của user
+
+---
+
+## Session 2026-04-09
+
+### Đã làm
+
+**Fix toàn bộ build errors (4 root causes):**
+
+1. **Fix x:Class namespace trong 5 XAML files** — `ShipAutoCadPlugin.UI.*` → `MCGCadPlugin.Views.FittingManagement.*`:
+   - `Views/FittingManagement/BOM/BomPreviewWindow.xaml`
+   - `Views/FittingManagement/Library/FittingLibraryWindow.xaml`
+   - `Views/FittingManagement/Library/Accessory/AccessoryManagerWindow.xaml`
+   - `Views/FittingManagement/Library/Accessory/NewAccessoryWindow.xaml`
+   - `Views/FittingManagement/Library/VirtualItemWindow.xaml`
+
+2. **Chuyển 4 placeholder View thành WPF UserControl** (tạo .xaml + .xaml.cs, xóa .cs cũ):
+   - `Views/DetailDesign/DetailDesignView.xaml` + `.xaml.cs`
+   - `Views/PanelData/PanelDataView.xaml` + `.xaml.cs`
+   - `Views/TableOfContent/TableOfContentView.xaml` + `.xaml.cs`
+   - `Views/Weight/WeightView.xaml` + `.xaml.cs`
+
+3. **Fix ambiguous Exception trong PaletteManager.cs** — thêm `using Exception = System.Exception;`
+
+4. **Xóa `RecalculateSize`** — property không tồn tại trên PaletteSet AutoCAD 2023
+
+### Trạng thái
+
+- **Phase:** 0 — Scaffold & Setup ✅ HOÀN THÀNH
+- Build succeeded — 0 errors, 0 warnings
+- Plugin sẵn sàng load vào AutoCAD
+
+### Bước tiếp theo
+
+1. Test load plugin vào AutoCAD 2023 — chạy lệnh `MCG_Show`
+2. Bắt đầu Phase 1 — triển khai logic cho từng Module
+
+### Ghi chú API
+
+- **x:Class phải khớp namespace code-behind** — nếu XAML dùng `ShipAutoCadPlugin.UI.X` mà code-behind dùng `MCGCadPlugin.Views.Y.X` thì WPF không generate partial class, gây lỗi `InitializeComponent` và tất cả control names
+- **`Autodesk.AutoCAD.Runtime.Exception` xung đột với `System.Exception`** — khi `using Autodesk.AutoCAD.Runtime`, cần disambiguate bằng `using Exception = System.Exception;`
+- **`PaletteSet.RecalculateSize` không có trong AutoCAD 2023 .NET API** — property này không tồn tại, xóa bỏ
+
+---
+
 ## Session 2026-04-08
 
 ### Đã làm

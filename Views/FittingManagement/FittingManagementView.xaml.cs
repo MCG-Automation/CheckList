@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
 using MCGCadPlugin.Services.FittingManagement;
 
 namespace MCGCadPlugin.Views.FittingManagement
@@ -17,16 +19,64 @@ namespace MCGCadPlugin.Views.FittingManagement
         }
 
         // =========================================================
-        // STEP 1 & 2: EXTRACTION & JSON IMPORT (Tạm thời chặn bằng MessageBox)
+        // STEP 1: IDW EXTRACTION (Inventor COM Interop)
         // =========================================================
         private void BtnBatchImportInventor_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Tính năng Import Inventor sẽ được cập nhật Service ở bước cuối cùng.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                OpenFileDialog ofd = new OpenFileDialog
+                {
+                    Title = "Select Inventor Drawing Files (.idw)",
+                    Filter = "Inventor Drawing (*.idw)|*.idw",
+                    Multiselect = true
+                };
+
+                if (ofd.ShowDialog() != true || ofd.FileNames.Length == 0) return;
+
+                var result = _service.BatchImportIdwFiles(ofd.FileNames);
+                MessageBox.Show(
+                    $"Import IDW hoàn tất!\n\nThành công: {result.Item1}\nThất bại: {result.Item2}",
+                    "Import IDW Result",
+                    MessageBoxButton.OK,
+                    result.Item2 > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi Import IDW", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
+        // =========================================================
+        // STEP 2: JSON IMPORT (Tạo Block + Attributes + Catalog)
+        // =========================================================
         private void BtnImportJson_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Tính năng Import JSON sẽ được cập nhật Service ở bước cuối cùng.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                OpenFileDialog ofd = new OpenFileDialog
+                {
+                    Title = "Select Extracted JSON Files",
+                    Filter = "JSON Files (*.json)|*.json",
+                    Multiselect = true
+                };
+
+                if (ofd.ShowDialog() != true || ofd.FileNames.Length == 0) return;
+
+                // Xác định BomType từ RadioButton trên UI
+                string bomType = (RadioPanelFitting.IsChecked == true) ? "PANEL" : "DETAIL";
+
+                var result = _service.ImportJsonAndCreateBlocks(ofd.FileNames, bomType);
+                MessageBox.Show(
+                    $"Import JSON hoàn tất!\n\nBlock đã tạo: {result.Item1}\nBỏ qua/Thất bại: {result.Item2}",
+                    "Import JSON Result",
+                    MessageBoxButton.OK,
+                    result.Item2 > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Lỗi Import JSON", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // =========================================================

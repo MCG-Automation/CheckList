@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
+using Exception = System.Exception;
 using MCGCadPlugin.Views.DetailDesign;
 using MCGCadPlugin.Views.FittingManagement;
 using MCGCadPlugin.Views.PanelData;
@@ -126,7 +127,6 @@ namespace MCGCadPlugin.Commands
             _paletteSet.Size = new Size(400, 600);
             _paletteSet.Style = PaletteSetStyles.ShowTabForSingle
                               | PaletteSetStyles.Snappable;
-            _paletteSet.RecalculateSize = true;
             _paletteSet.KeepFocus = true;
 
             Debug.WriteLine($"{LOG_PREFIX} PaletteSet khởi tạo THÀNH CÔNG — 5 tabs đã đăng ký.");

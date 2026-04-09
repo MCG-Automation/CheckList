@@ -1,4 +1,4 @@
-<Window x:Class="ShipAutoCadPlugin.UI.FittingLibraryWindow"
+<Window x:Class="MCGCadPlugin.Views.FittingManagement.FittingLibraryWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MacGregor Fitting Library" Height="680" Width="1300"
