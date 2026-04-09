@@ -68,6 +68,8 @@
     <PackageReference Include="AutoCAD.NET.Model" Version="23.1.0" ExcludeAssets="runtime" />
     <PackageReference Include="AutoCAD.NET.Core" Version="23.1.0" ExcludeAssets="runtime" />
     <PackageReference Include="MongoDB.Driver" Version="3.7.0" ExcludeAssets="runtime"/>
+
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" ExcludeAssets="runtime" />
   </ItemGroup>
 
 </Project>
