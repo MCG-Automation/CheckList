@@ -8,8 +8,8 @@ namespace MCGCadPlugin.Services.FittingManagement
     public interface IFittingManagementService
     {
         // --- Giai đoạn 1 & 2: IDW Extraction & JSON Import ---
-        Tuple<int, int> BatchImportIdwFiles(string[] idwPaths);
-        Tuple<int, int> ImportJsonAndCreateBlocks(string[] jsonPaths, string bomType);
+        ImportResult BatchImportIdwFiles(string[] idwPaths);
+        ImportResult ImportJsonAndCreateBlocks(string[] jsonPaths, string bomType);
 
         // --- Giai đoạn 3.1: Library & Virtual Items ---
         List<CatalogItem> GetMasterCatalogItems();

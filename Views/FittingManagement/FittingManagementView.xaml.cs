@@ -1,9 +1,12 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using MCGCadPlugin.Models.FittingManagement;
 using MCGCadPlugin.Services.FittingManagement;
+using MCGCadPlugin.Utilities;
 
 namespace MCGCadPlugin.Views.FittingManagement
 {
@@ -34,16 +37,12 @@ namespace MCGCadPlugin.Views.FittingManagement
 
                 if (ofd.ShowDialog() != true || ofd.FileNames.Length == 0) return;
 
-                var result = _service.BatchImportIdwFiles(ofd.FileNames);
-                MessageBox.Show(
-                    $"Import IDW hoàn tất!\n\nThành công: {result.Item1}\nThất bại: {result.Item2}",
-                    "Import IDW Result",
-                    MessageBoxButton.OK,
-                    result.Item2 > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+                ImportResult result = _service.BatchImportIdwFiles(ofd.FileNames);
+                ShowImportResultDialog("Import IDW", result);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Lỗi Import IDW", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowExceptionDialog("Lỗi Import IDW", ex);
             }
         }
 
@@ -66,16 +65,84 @@ namespace MCGCadPlugin.Views.FittingManagement
                 // Xác định BomType từ RadioButton trên UI
                 string bomType = (RadioPanelFitting.IsChecked == true) ? "PANEL" : "DETAIL";
 
-                var result = _service.ImportJsonAndCreateBlocks(ofd.FileNames, bomType);
-                MessageBox.Show(
-                    $"Import JSON hoàn tất!\n\nBlock đã tạo: {result.Item1}\nBỏ qua/Thất bại: {result.Item2}",
-                    "Import JSON Result",
-                    MessageBoxButton.OK,
-                    result.Item2 > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+                ImportResult result = _service.ImportJsonAndCreateBlocks(ofd.FileNames, bomType);
+                ShowImportResultDialog("Import JSON", result);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Lỗi Import JSON", MessageBoxButton.OK, MessageBoxImage.Error);
+                ShowExceptionDialog("Lỗi Import JSON", ex);
+            }
+        }
+
+        /// <summary>
+        /// Hien thi dialog ket qua import voi chi tiet loi tung file.
+        /// Nut "Open Log" mo file log de user gui cho team dev.
+        /// </summary>
+        private void ShowImportResultDialog(string title, ImportResult result)
+        {
+            string message = $"{title} hoàn tất!\n\n" +
+                             $"✓ Thành công: {result.SuccessCount}\n" +
+                             $"✗ Thất bại:   {result.FailCount}";
+
+            if (result.FailCount > 0 && result.Errors.Count > 0)
+            {
+                // Hien thi toi da 8 loi dau tien - tranh dialog qua dai
+                int maxErrorsToShow = 8;
+                var errorsToShow = result.Errors.Take(maxErrorsToShow).ToList();
+
+                message += "\n\n── Chi tiết lỗi ──\n" + string.Join("\n", errorsToShow);
+
+                if (result.Errors.Count > maxErrorsToShow)
+                    message += $"\n\n... và {result.Errors.Count - maxErrorsToShow} lỗi khác (xem trong file log).";
+
+                message += $"\n\n── Log chi tiết ──\n{FileLogger.LogPath}" +
+                           "\n\nNhấn Yes để mở thư mục chứa log, No để đóng.";
+
+                var answer = MessageBox.Show(message, $"{title} Result",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (answer == MessageBoxResult.Yes)
+                    OpenLogFolder();
+            }
+            else
+            {
+                MessageBox.Show(message, $"{title} Result",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// Hien thi dialog khi exception bubble up (loi ngoai pham vi per-file).
+        /// </summary>
+        private void ShowExceptionDialog(string title, Exception ex)
+        {
+            string message = $"Lỗi: {ex.Message}\n\n" +
+                             $"Chi tiết lỗi đã được ghi vào file log:\n{FileLogger.LogPath}" +
+                             "\n\nNhấn Yes để mở thư mục chứa log.";
+
+            var answer = MessageBox.Show(message, title,
+                MessageBoxButton.YesNo, MessageBoxImage.Error);
+
+            if (answer == MessageBoxResult.Yes)
+                OpenLogFolder();
+        }
+
+        /// <summary>
+        /// Mo Windows Explorer tai thu muc chua file log va highlight file log.
+        /// </summary>
+        private void OpenLogFolder()
+        {
+            try
+            {
+                if (System.IO.File.Exists(FileLogger.LogPath))
+                    Process.Start("explorer.exe", $"/select,\"{FileLogger.LogPath}\"");
+                else
+                    Process.Start("explorer.exe", FileLogger.LogDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Không thể mở thư mục log: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

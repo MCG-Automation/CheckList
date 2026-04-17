@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using MCGCadPlugin.Models.FittingManagement;
+using MCGCadPlugin.Utilities;
 
 namespace MCGCadPlugin.Services.FittingManagement
 {
@@ -19,13 +20,14 @@ namespace MCGCadPlugin.Services.FittingManagement
         /// Yêu cầu: Inventor phải được cài đặt trên máy.
         /// </summary>
         /// <param name="idwPaths">Danh sách đường dẫn file .idw</param>
-        /// <returns>Tuple (số file thành công, số file thất bại)</returns>
-        public Tuple<int, int> BatchImportIdwFiles(string[] idwPaths)
+        /// <returns>ImportResult chứa số liệu và chi tiết lỗi</returns>
+        public ImportResult BatchImportIdwFiles(string[] idwPaths)
         {
+            var result = new ImportResult();
+            FileLogger.LogSessionStart($"BatchImportIdwFiles ({idwPaths.Length} files)");
+            FileLogger.Log(LOG_PREFIX, $"Bắt đầu BatchImportIdwFiles — {idwPaths.Length} file(s)...");
             Debug.WriteLine($"{LOG_PREFIX} Bắt đầu BatchImportIdwFiles — {idwPaths.Length} file(s)...");
 
-            int successCount = 0;
-            int failCount = 0;
             bool weStartedInventor = false;
             dynamic invApp = null;
 
@@ -36,28 +38,35 @@ namespace MCGCadPlugin.Services.FittingManagement
 
                 // 2. Đảm bảo thư mục output tồn tại
                 if (!Directory.Exists(_libraryFolderPath))
+                {
                     Directory.CreateDirectory(_libraryFolderPath);
+                    FileLogger.Log(LOG_PREFIX, $"Đã tạo thư mục: {_libraryFolderPath}");
+                }
 
                 // 3. Xử lý từng file IDW
                 foreach (string idwPath in idwPaths)
                 {
+                    string fileName = Path.GetFileName(idwPath);
                     try
                     {
                         ProcessSingleIdwFile(invApp, idwPath);
-                        successCount++;
-                        Debug.WriteLine($"{LOG_PREFIX} Import IDW THÀNH CÔNG: {Path.GetFileName(idwPath)}");
+                        result.SuccessCount++;
+                        FileLogger.Log(LOG_PREFIX, $"Import IDW THÀNH CÔNG: {fileName}");
+                        Debug.WriteLine($"{LOG_PREFIX} Import IDW THÀNH CÔNG: {fileName}");
                     }
                     catch (System.Exception ex)
                     {
-                        failCount++;
-                        Debug.WriteLine($"{LOG_PREFIX} LỖI import IDW '{Path.GetFileName(idwPath)}': {ex.Message}");
+                        result.FailCount++;
+                        FileLogger.LogException(LOG_PREFIX, $"import IDW '{fileName}'", ex);
+                        Debug.WriteLine($"{LOG_PREFIX} LỖI import IDW '{fileName}': {ex.Message}");
+                        result.AddError(fileName, $"{ex.GetType().Name}: {ex.Message}");
                     }
                 }
             }
             catch (System.Exception ex)
             {
+                FileLogger.LogException(LOG_PREFIX, "BatchImportIdwFiles (outer)", ex);
                 Debug.WriteLine($"{LOG_PREFIX} LỖI BatchImportIdwFiles: {ex.Message}");
-                Debug.WriteLine($"{LOG_PREFIX} Stack trace:\n{ex.StackTrace}");
                 throw;
             }
             finally
@@ -66,8 +75,9 @@ namespace MCGCadPlugin.Services.FittingManagement
                 ReleaseInventorInstance(invApp, weStartedInventor);
             }
 
-            Debug.WriteLine($"{LOG_PREFIX} BatchImportIdwFiles HOÀN TẤT — Thành công: {successCount}, Thất bại: {failCount}.");
-            return new Tuple<int, int>(successCount, failCount);
+            FileLogger.Log(LOG_PREFIX, $"HOÀN TẤT — Thành công: {result.SuccessCount}, Thất bại: {result.FailCount}.");
+            Debug.WriteLine($"{LOG_PREFIX} BatchImportIdwFiles HOÀN TẤT — Thành công: {result.SuccessCount}, Thất bại: {result.FailCount}.");
+            return result;
         }
 
         #region IDW Import — Private Helpers
@@ -84,20 +94,23 @@ namespace MCGCadPlugin.Services.FittingManagement
             {
                 // Thử kết nối instance đang chạy
                 invApp = Marshal.GetActiveObject("Inventor.Application");
-                Debug.WriteLine($"{LOG_PREFIX} Đã kết nối Inventor instance đang chạy.");
+                FileLogger.Log(LOG_PREFIX, "Đã kết nối Inventor instance đang chạy.");
             }
             catch
             {
                 // Inventor chưa chạy — khởi tạo mới
                 Type invType = Type.GetTypeFromProgID("Inventor.Application");
                 if (invType == null)
+                {
+                    FileLogger.Log(LOG_PREFIX, "LỖI: Inventor chưa được cài đặt trên máy.");
                     throw new InvalidOperationException(
                         "Inventor chưa được cài đặt trên máy này. Vui lòng cài Inventor để sử dụng tính năng Import IDW.");
+                }
 
                 invApp = Activator.CreateInstance(invType);
                 invApp.Visible = false;
                 weStarted = true;
-                Debug.WriteLine($"{LOG_PREFIX} Đã khởi tạo Inventor instance mới (background).");
+                FileLogger.Log(LOG_PREFIX, "Đã khởi tạo Inventor instance mới (background).");
             }
 
             return invApp;
@@ -115,13 +128,13 @@ namespace MCGCadPlugin.Services.FittingManagement
                 if (weStarted)
                 {
                     invApp.Quit();
-                    Debug.WriteLine($"{LOG_PREFIX} Đã tắt Inventor instance.");
+                    FileLogger.Log(LOG_PREFIX, "Đã tắt Inventor instance.");
                 }
                 Marshal.ReleaseComObject(invApp);
             }
             catch (System.Exception ex)
             {
-                Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO khi giải phóng Inventor COM: {ex.Message}");
+                FileLogger.LogException(LOG_PREFIX, "giải phóng Inventor COM", ex);
             }
         }
 
@@ -130,7 +143,7 @@ namespace MCGCadPlugin.Services.FittingManagement
         /// </summary>
         private void ProcessSingleIdwFile(dynamic invApp, string idwPath)
         {
-            Debug.WriteLine($"{LOG_PREFIX} Đang xử lý: {Path.GetFileName(idwPath)}...");
+            FileLogger.Log(LOG_PREFIX, $"Đang xử lý: {Path.GetFileName(idwPath)}...");
 
             string baseName = Path.GetFileNameWithoutExtension(idwPath);
             string dwgOutputPath = Path.Combine(_libraryFolderPath, baseName + ".dwg");
@@ -139,22 +152,27 @@ namespace MCGCadPlugin.Services.FittingManagement
             dynamic drawingDoc = null;
             try
             {
-                // Mở file IDW (read-only)
-                drawingDoc = invApp.Documents.Open(idwPath, false);
+                // Mở file IDW (OpenVisible = TRUE — bắt buộc để SaveCopyAs có thể render views)
+                // Inventor app đã được ẩn (invApp.Visible = false), nhưng document cần có window nội bộ
+                FileLogger.Log(LOG_PREFIX, $"  Bước 1/4: Đang mở file IDW (OpenVisible=true)...");
+                drawingDoc = invApp.Documents.Open(idwPath, true);
 
                 // Trích xuất iProperties
+                FileLogger.Log(LOG_PREFIX, $"  Bước 2/4: Đang trích xuất iProperties...");
                 FittingMetadata metadata = ExtractIProperties(drawingDoc);
 
                 // Trích xuất thông tin các Drawing Views
+                FileLogger.Log(LOG_PREFIX, $"  Bước 3/4: Đang trích xuất Drawing Views...");
                 metadata.Views = ExtractDrawingViews(drawingDoc);
 
                 // Export DWG
-                ExportIdwToDwg(drawingDoc, dwgOutputPath);
+                FileLogger.Log(LOG_PREFIX, $"  Bước 4/4: Đang export DWG tới {dwgOutputPath}...");
+                ExportIdwToDwg(invApp, drawingDoc, dwgOutputPath);
 
                 // Lưu metadata ra JSON
                 string json = JsonConvert.SerializeObject(metadata, Formatting.Indented);
                 File.WriteAllText(jsonOutputPath, json);
-                Debug.WriteLine($"{LOG_PREFIX} Đã lưu JSON: {jsonOutputPath}");
+                FileLogger.Log(LOG_PREFIX, $"  Đã lưu JSON: {jsonOutputPath}");
             }
             finally
             {
@@ -168,7 +186,7 @@ namespace MCGCadPlugin.Services.FittingManagement
                     }
                     catch (System.Exception ex)
                     {
-                        Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO khi đóng IDW: {ex.Message}");
+                        FileLogger.LogException(LOG_PREFIX, "đóng IDW", ex);
                     }
                 }
             }
@@ -200,10 +218,10 @@ namespace MCGCadPlugin.Services.FittingManagement
             }
             catch (System.Exception ex)
             {
-                Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO khi đọc iProperties: {ex.Message}");
+                FileLogger.LogException(LOG_PREFIX, "đọc iProperties", ex);
             }
 
-            Debug.WriteLine($"{LOG_PREFIX} iProperties: PartNumber={metadata.PartNumber}, Title={metadata.Title}");
+            FileLogger.Log(LOG_PREFIX, $"  iProperties: PartNumber='{metadata.PartNumber}', Title='{metadata.Title}'");
             return metadata;
         }
 
@@ -218,7 +236,6 @@ namespace MCGCadPlugin.Services.FittingManagement
                 object val = prop.Value;
                 if (val == null) return "";
 
-                // Mass trong Inventor trả về dạng số (double) — chuyển thành string
                 if (val is double dVal) return dVal.ToString("F3");
                 return val.ToString();
             }
@@ -243,70 +260,209 @@ namespace MCGCadPlugin.Services.FittingManagement
                     {
                         try
                         {
+                            // Inventor DrawingView.Position trả về Point2d (center của view)
+                            dynamic position = drawingView.Position;
                             views.Add(new ViewMetadata
                             {
                                 Name = (string)drawingView.Name,
-                                CenterX = (double)drawingView.Center.X,
-                                CenterY = (double)drawingView.Center.Y,
+                                CenterX = (double)position.X,
+                                CenterY = (double)position.Y,
                                 Width = (double)drawingView.Width,
                                 Height = (double)drawingView.Height
                             });
                         }
                         catch (System.Exception ex)
                         {
-                            Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO khi đọc DrawingView: {ex.Message}");
+                            FileLogger.LogException(LOG_PREFIX, "đọc DrawingView", ex);
                         }
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO khi duyệt Sheets: {ex.Message}");
+                FileLogger.LogException(LOG_PREFIX, "duyệt Sheets", ex);
             }
 
-            Debug.WriteLine($"{LOG_PREFIX} Tìm thấy {views.Count} drawing view(s).");
+            FileLogger.Log(LOG_PREFIX, $"  Tìm thấy {views.Count} drawing view(s).");
             return views;
         }
 
         /// <summary>
-        /// Export file IDW sang định dạng DWG qua Inventor COM.
+        /// Export file IDW sang định dạng DWG.
+        /// Chiến lược: Thử Document.SaveAs() trước (đơn giản, Inventor tự detect format).
+        /// Nếu fail, fallback sang DWG Translator với INI (nếu tìm được).
         /// </summary>
-        private void ExportIdwToDwg(dynamic drawingDoc, string dwgOutputPath)
+        private void ExportIdwToDwg(dynamic invApp, dynamic drawingDoc, string dwgOutputPath)
         {
-            Debug.WriteLine($"{LOG_PREFIX} Đang export DWG: {dwgOutputPath}...");
-
-            // Lấy DWG translator add-in từ Inventor
-            dynamic translatorAddin = null;
-            foreach (dynamic addin in drawingDoc.Parent.ApplicationAddIns)
+            // Xóa file cũ nếu tồn tại (tránh Inventor warning dialog)
+            if (File.Exists(dwgOutputPath))
             {
-                // GUID của Inventor DWG Translator: {C24E3AC2-122E-11D5-8E91-0010B541CD80}
-                if (addin.ClassIdString == "{C24E3AC2-122E-11D5-8E91-0010B541CD80}")
+                FileLogger.Log(LOG_PREFIX, "    Đang xóa file DWG cũ...");
+                try { File.Delete(dwgOutputPath); }
+                catch (System.Exception ex)
                 {
-                    translatorAddin = addin;
-                    break;
+                    FileLogger.LogException(LOG_PREFIX, "xóa file DWG cũ", ex);
                 }
             }
 
-            if (translatorAddin == null)
-                throw new InvalidOperationException("Không tìm thấy DWG Translator Add-In trong Inventor.");
-
-            // Cấu hình export context
-            dynamic transContext = translatorAddin.Parent.TransientObjects.CreateTranslationContext();
-            transContext.Type = 1; // kSaveCopyAsTranslation
-
-            // Tạo NameValueMap cho options
-            dynamic options = translatorAddin.Parent.TransientObjects.CreateNameValueMap();
-
-            // Kiểm tra có cần options không
-            dynamic hasOptions = null;
-            if (translatorAddin.HasSaveCopyAsOptions(drawingDoc, transContext, options))
+            // === CHIẾN LƯỢC 1: Document.SaveAs — đơn giản nhất, không cần INI ===
+            FileLogger.Log(LOG_PREFIX, "    [A1] Thử export qua drawingDoc.SaveAs(path, true)...");
+            try
             {
-                // Sử dụng options mặc định từ Inventor
+                drawingDoc.SaveAs(dwgOutputPath, true); // true = SaveCopyAs, giữ IDW gốc
+                if (File.Exists(dwgOutputPath))
+                {
+                    FileLogger.Log(LOG_PREFIX, $"    [A2] Export DWG THÀNH CÔNG qua SaveAs: {dwgOutputPath}");
+                    return;
+                }
+                FileLogger.Log(LOG_PREFIX, "    [A3] SaveAs hoàn tất nhưng file không được tạo — fallback sang translator.");
+            }
+            catch (System.Exception exSaveAs)
+            {
+                FileLogger.LogException(LOG_PREFIX, "SaveAs (chiến lược 1)", exSaveAs);
+                FileLogger.Log(LOG_PREFIX, "    [A3] SaveAs fail — fallback sang translator.");
             }
 
-            // Thực hiện export
-            translatorAddin.SaveCopyAs(drawingDoc, transContext, options, dwgOutputPath);
-            Debug.WriteLine($"{LOG_PREFIX} Export DWG THÀNH CÔNG: {dwgOutputPath}");
+            // === CHIẾN LƯỢC 2: DWG Translator + INI ===
+            ExportViaTranslator(invApp, drawingDoc, dwgOutputPath);
+        }
+
+        /// <summary>
+        /// Fallback: Export qua DWG Translator Add-In với file INI.
+        /// </summary>
+        private void ExportViaTranslator(dynamic invApp, dynamic drawingDoc, string dwgOutputPath)
+        {
+            const string DWG_TRANSLATOR_GUID = "{C24E3AC2-122E-11D5-8E91-0010B541CD80}";
+
+            FileLogger.Log(LOG_PREFIX, "    [B1] Đang lấy DWG Translator Add-In...");
+            dynamic translatorAddin;
+            try
+            {
+                translatorAddin = invApp.ApplicationAddIns.ItemById(DWG_TRANSLATOR_GUID);
+            }
+            catch (System.Exception ex)
+            {
+                FileLogger.LogException(LOG_PREFIX, "lấy DWG Translator Add-In", ex);
+                throw new InvalidOperationException(
+                    $"Không tìm thấy DWG Translator Add-In (GUID: {DWG_TRANSLATOR_GUID}).", ex);
+            }
+            if (translatorAddin == null)
+                throw new InvalidOperationException("DWG Translator Add-In không tồn tại.");
+
+            FileLogger.Log(LOG_PREFIX, "    [B2] Đang kích hoạt Add-In...");
+            try { translatorAddin.Activate(); }
+            catch (System.Exception ex)
+            {
+                FileLogger.Log(LOG_PREFIX, $"    Activate() warning: {ex.Message}");
+            }
+
+            dynamic transientObjects = invApp.TransientObjects;
+            dynamic options = transientObjects.CreateNameValueMap();
+            dynamic dataMedium = transientObjects.CreateDataMedium();
+            dataMedium.FileName = dwgOutputPath;
+            dynamic transContext = transientObjects.CreateTranslationContext();
+            transContext.Type = 102657; // kFileBrowseIOMechanism
+
+            // Tìm INI file — probe nhiều location kể cả INI của user tự tạo trong plugin folder
+            string iniPath = FindInventorDwgIniPath();
+            if (string.IsNullOrEmpty(iniPath))
+            {
+                // Không tìm được INI chuẩn — tạo INI tối thiểu trong %APPDATA%\MCGCadPlugin\
+                iniPath = CreateMinimalDwgIni();
+                FileLogger.Log(LOG_PREFIX, $"    [B3] Đã tạo INI tối thiểu: {iniPath}");
+            }
+            else
+            {
+                FileLogger.Log(LOG_PREFIX, $"    [B3] Tìm thấy DWG INI: {iniPath}");
+            }
+
+            if (!string.IsNullOrEmpty(iniPath))
+            {
+                try
+                {
+                    options.Add("Export_Acad_IniFile", iniPath);
+                    FileLogger.Log(LOG_PREFIX, "    [B4] Đã set Export_Acad_IniFile.");
+                }
+                catch (System.Exception exAdd)
+                {
+                    FileLogger.Log(LOG_PREFIX, $"    [B4] Warning: {exAdd.Message}");
+                }
+            }
+
+            FileLogger.Log(LOG_PREFIX, "    [B5] Đang gọi SaveCopyAs...");
+            translatorAddin.SaveCopyAs(drawingDoc, transContext, options, dataMedium);
+            FileLogger.Log(LOG_PREFIX, $"    [B6] Export DWG THÀNH CÔNG qua Translator: {dwgOutputPath}");
+        }
+
+        /// <summary>
+        /// Tạo file INI tối thiểu cho DWG export khi không tìm thấy INI chuẩn của Inventor.
+        /// Lưu tại %APPDATA%\MCGCadPlugin\DWG-AutoCAD Export.ini.
+        /// </summary>
+        private string CreateMinimalDwgIni()
+        {
+            try
+            {
+                string iniPath = Path.Combine(FileLogger.LogDirectory, "DWG-AutoCAD Export.ini");
+                if (File.Exists(iniPath)) return iniPath;
+
+                // Nội dung INI tối thiểu — dùng default DWG 2018 format
+                string content =
+                    "[System]\r\n" +
+                    "Version=2\r\n" +
+                    "Language=ENU\r\n" +
+                    "\r\n" +
+                    "[Export]\r\n" +
+                    "Export_Acad_Version=27\r\n" +
+                    "Export_Acad_Revision=0\r\n" +
+                    "\r\n";
+
+                File.WriteAllText(iniPath, content);
+                return iniPath;
+            }
+            catch (System.Exception ex)
+            {
+                FileLogger.LogException(LOG_PREFIX, "tạo INI tối thiểu", ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Tìm đường dẫn file "DWG-AutoCAD Export.ini" trong các phiên bản Inventor đã cài.
+        /// Ưu tiên phiên bản mới nhất trước.
+        /// </summary>
+        private string FindInventorDwgIniPath()
+        {
+            string publicDocs = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments);
+
+            // Duyệt từ phiên bản mới nhất xuống cũ nhất
+            string[] versions = { "2026", "2025", "2024", "2023", "2022", "2021", "2020" };
+            string[] iniNames = { "DWG-AutoCAD Export.ini", "DWG AutoCAD Export.ini" };
+
+            foreach (string version in versions)
+            {
+                foreach (string iniName in iniNames)
+                {
+                    string path = Path.Combine(publicDocs,
+                        "Autodesk", $"Inventor {version}", "Design Data", iniName);
+                    if (File.Exists(path))
+                        return path;
+                }
+            }
+
+            // Thử luôn thư mục C:\ProgramData (một số bản Inventor để INI ở đây)
+            string programData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            foreach (string version in versions)
+            {
+                foreach (string iniName in iniNames)
+                {
+                    string path = Path.Combine(programData,
+                        "Autodesk", $"Inventor {version}", "Design Data", iniName);
+                    if (File.Exists(path))
+                        return path;
+                }
+            }
+
+            return null;
         }
 
         #endregion

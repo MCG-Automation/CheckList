@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
 using MCGCadPlugin.Models.FittingManagement;
+using MCGCadPlugin.Utilities;
 using MCGCadPlugin.Utilities.FittingManagement;
 
 namespace MCGCadPlugin.Services.FittingManagement
@@ -28,13 +29,14 @@ namespace MCGCadPlugin.Services.FittingManagement
         /// </summary>
         /// <param name="jsonPaths">Danh sách đường dẫn file .json</param>
         /// <param name="bomType">Loại BOM: "PANEL" hoặc "DETAIL"</param>
-        /// <returns>Tuple (số file thành công, số file thất bại)</returns>
-        public Tuple<int, int> ImportJsonAndCreateBlocks(string[] jsonPaths, string bomType)
+        /// <returns>ImportResult chứa số liệu và chi tiết lỗi</returns>
+        public ImportResult ImportJsonAndCreateBlocks(string[] jsonPaths, string bomType)
         {
+            var result = new ImportResult();
+            FileLogger.LogSessionStart($"ImportJsonAndCreateBlocks ({jsonPaths.Length} files, BomType={bomType})");
+            FileLogger.Log(LOG_PREFIX, $"Bắt đầu ImportJsonAndCreateBlocks — {jsonPaths.Length} file(s), BomType={bomType}...");
             Debug.WriteLine($"{LOG_PREFIX} Bắt đầu ImportJsonAndCreateBlocks — {jsonPaths.Length} file(s), BomType={bomType}...");
 
-            int successCount = 0;
-            int failCount = 0;
             List<CatalogItem> newCatalogItems = new List<CatalogItem>();
 
             // Xác định layer và màu dựa trên BomType
@@ -50,6 +52,7 @@ namespace MCGCadPlugin.Services.FittingManagement
                 {
                     foreach (string jsonPath in jsonPaths)
                     {
+                        string fileName = Path.GetFileName(jsonPath);
                         try
                         {
                             CatalogItem catalogItem = ProcessSingleJsonFile(
@@ -58,18 +61,20 @@ namespace MCGCadPlugin.Services.FittingManagement
                             if (catalogItem != null)
                             {
                                 newCatalogItems.Add(catalogItem);
-                                successCount++;
-                                Debug.WriteLine($"{LOG_PREFIX} Import JSON THÀNH CÔNG: {Path.GetFileName(jsonPath)}");
+                                result.SuccessCount++;
+                                FileLogger.Log(LOG_PREFIX, $"Import JSON THÀNH CÔNG: {fileName}");
                             }
                             else
                             {
-                                failCount++;
+                                result.FailCount++;
+                                result.AddError(fileName, "Bỏ qua (DWG không tồn tại hoặc block đã tồn tại)");
                             }
                         }
                         catch (System.Exception ex)
                         {
-                            failCount++;
-                            Debug.WriteLine($"{LOG_PREFIX} LỖI import JSON '{Path.GetFileName(jsonPath)}': {ex.Message}");
+                            result.FailCount++;
+                            FileLogger.LogException(LOG_PREFIX, $"import JSON '{fileName}'", ex);
+                            result.AddError(fileName, $"{ex.GetType().Name}: {ex.Message}");
                         }
                     }
                 }
@@ -82,18 +87,17 @@ namespace MCGCadPlugin.Services.FittingManagement
                         Directory.CreateDirectory(_libraryFolderPath);
 
                     var mergeResult = MergeItemsToJson(catalogPath, newCatalogItems);
-                    Debug.WriteLine($"{LOG_PREFIX} Đã cập nhật MasterCatalog: Mới={mergeResult.Item1}, Cập nhật={mergeResult.Item2}.");
+                    FileLogger.Log(LOG_PREFIX, $"Đã cập nhật MasterCatalog: Mới={mergeResult.Item1}, Cập nhật={mergeResult.Item2}.");
                 }
             }
             catch (System.Exception ex)
             {
-                Debug.WriteLine($"{LOG_PREFIX} LỖI ImportJsonAndCreateBlocks: {ex.Message}");
-                Debug.WriteLine($"{LOG_PREFIX} Stack trace:\n{ex.StackTrace}");
+                FileLogger.LogException(LOG_PREFIX, "ImportJsonAndCreateBlocks (outer)", ex);
                 throw;
             }
 
-            Debug.WriteLine($"{LOG_PREFIX} ImportJsonAndCreateBlocks HOÀN TẤT — Thành công: {successCount}, Thất bại: {failCount}.");
-            return new Tuple<int, int>(successCount, failCount);
+            FileLogger.Log(LOG_PREFIX, $"HOÀN TẤT — Thành công: {result.SuccessCount}, Thất bại: {result.FailCount}.");
+            return result;
         }
 
         #region JSON Import — Private Helpers
@@ -105,14 +109,14 @@ namespace MCGCadPlugin.Services.FittingManagement
         private CatalogItem ProcessSingleJsonFile(
             Database db, string jsonPath, string bomType, string layerName, short colorIndex)
         {
-            Debug.WriteLine($"{LOG_PREFIX} Đang xử lý JSON: {Path.GetFileName(jsonPath)}...");
+            FileLogger.Log(LOG_PREFIX, $"Đang xử lý JSON: {Path.GetFileName(jsonPath)}...");
 
             // 1. Đọc và parse JSON
             string jsonContent = File.ReadAllText(jsonPath);
             FittingMetadata metadata = JsonConvert.DeserializeObject<FittingMetadata>(jsonContent);
             if (metadata == null)
             {
-                Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO: JSON rỗng hoặc không hợp lệ — bỏ qua.");
+                FileLogger.Log(LOG_PREFIX, "  CẢNH BÁO: JSON rỗng hoặc không hợp lệ — bỏ qua.");
                 return null;
             }
 
@@ -125,7 +129,7 @@ namespace MCGCadPlugin.Services.FittingManagement
             string dwgPath = Path.ChangeExtension(jsonPath, ".dwg");
             if (!File.Exists(dwgPath))
             {
-                Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO: Không tìm thấy file DWG tương ứng: {dwgPath} — bỏ qua.");
+                FileLogger.Log(LOG_PREFIX, $"  CẢNH BÁO: Không tìm thấy file DWG tương ứng: {dwgPath} — bỏ qua.");
                 return null;
             }
 
@@ -139,7 +143,7 @@ namespace MCGCadPlugin.Services.FittingManagement
                     // Kiểm tra block đã tồn tại chưa
                     if (bt.Has(blockName))
                     {
-                        Debug.WriteLine($"{LOG_PREFIX} Block '{blockName}' đã tồn tại — bỏ qua.");
+                        FileLogger.Log(LOG_PREFIX, $"  Block '{blockName}' đã tồn tại — bỏ qua.");
                         tr.Commit();
                         return null;
                     }
@@ -184,11 +188,11 @@ namespace MCGCadPlugin.Services.FittingManagement
                         "POS_NUM", "", "Position Number", true);
 
                     tr.Commit();
-                    Debug.WriteLine($"{LOG_PREFIX} Block '{blockName}' đã tạo với 7 attributes, layer={layerName}.");
+                    FileLogger.Log(LOG_PREFIX, $"  Block '{blockName}' đã tạo với 7 attributes, layer={layerName}.");
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.WriteLine($"{LOG_PREFIX} Transaction ABORT: {ex.Message}");
+                    FileLogger.LogException(LOG_PREFIX, "Transaction", ex);
                     throw;
                 }
             }
