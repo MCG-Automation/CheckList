@@ -4,6 +4,26 @@
 
 ---
 
+## Session 2026-04-21 (4) — Rename plugin (CheckList)
+
+### Đã làm
+- [MCGCadPlugin.csproj](MCGCadPlugin.csproj): `<PluginName>MCGCadPlugin</PluginName>` → `<PluginName>MCGCadPlugin.CheckList</PluginName>` → DLL output đổi thành `MCGCadPlugin.CheckList_<timestamp>.dll`.
+- [Commands/PaletteManager.cs](Commands/PaletteManager.cs): PaletteSet title `"MCG Plugins"` → `"MCGCadPlugin - CheckList"`.
+- [CLAUDE.md](CLAUDE.md): nới rule §2 (hạn chế chứ không cấm tuyệt đối sửa csproj khi có lý do rõ ràng).
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- **Command names:** đã đổi ở session trước (`MCG_Checklist_Show` / `MCG_Checklist_Hide`) — không đổi lần này.
+
+### Bước tiếp theo
+- Test: gõ `MCG_Checklist_Show` / `MCG_Checklist_Hide` trong AutoCAD, xác nhận title `"MCGCadPlugin - CheckList"` và DLL mới `MCGCadPlugin.CheckList_*.dll`.
+- Load song song với plugin FittingManagement — phải thấy 2 PaletteSet riêng biệt.
+
+### Ghi chú API
+- Dùng dấu chấm (`.CheckList`) cho `PluginName` để an toàn với bundle/PackageContents/PowerShell regex trong target `UpdatePackageContents`.
+
+---
+
 ## Session 2026-04-21 (3) — Đổi PaletteGuid và tên lệnh cho CheckList (tránh conflict với FittingManagement)
 
 ### Đã làm

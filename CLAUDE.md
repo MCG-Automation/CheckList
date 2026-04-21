@@ -35,7 +35,7 @@ Bundle folder  : %APPDATA%\Autodesk\ApplicationPlugins\
 Build          : dotnet build -c Debug (chạy với quyền Administrator)
 ```
 
-> ⚠️ **KHÔNG BAO GIỜ chỉnh sửa `MCGCadPlugin.csproj`**
+> ⚠️ **Hạn chế chỉnh sửa `MCGCadPlugin.csproj`** — chỉ sửa khi có lý do rõ ràng (đổi `PluginName`, thêm `PackageReference`, đổi target framework). Không chạm các field không hiểu rõ.
 
 ---
 
