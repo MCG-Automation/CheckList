@@ -229,7 +229,7 @@ Views/CheckList/CheckList.View.xaml
 
 ```csharp
 // Commands/PaletteManager.cs
-private static readonly Guid PaletteGuid = new Guid("2b80cfe9-c560-49d6-8a09-9d636260fcf2");
+private static readonly Guid PaletteGuid = new Guid("7b3e9a2c-4d81-4f75-a63e-5c29d8b41f07");
 
 private void Initialize()
 {
@@ -268,8 +268,8 @@ Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
 > cần tương tác với bản vẽ (pick point, select entity, zoom, v.v.)
 
 **Lệnh CAD:**
-- `MCG_Show` → hiển thị PaletteSet
-- `MCG_Hide` → ẩn PaletteSet
+- `MCG_Checklist_Show` → hiển thị PaletteSet
+- `MCG_Checklist_Hide` → ẩn PaletteSet
 
 ---
 

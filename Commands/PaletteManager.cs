@@ -41,7 +41,7 @@ namespace MCGCadPlugin.Commands
         /// KHÔNG BAO GIỜ thay đổi giá trị này sau khi đã deploy.
         /// </summary>
         private static readonly Guid PaletteGuid =
-            new Guid("2b80cfe9-c560-49d6-8a09-9d636260fcf2");
+            new Guid("7b3e9a2c-4d81-4f75-a63e-5c29d8b41f07");
         #endregion
 
         #region Public Properties
@@ -100,12 +100,12 @@ namespace MCGCadPlugin.Commands
 
         #region AutoCAD Commands
 
-        /// <summary>Lệnh hiển thị Palette (gõ MCG_Show trong CAD)</summary>
-        [CommandMethod("MCG_Show", CommandFlags.Modal)]
+        /// <summary>Lệnh hiển thị Palette (gõ MCG_Checklist_Show trong CAD)</summary>
+        [CommandMethod("MCG_Checklist_Show", CommandFlags.Modal)]
         public void McgShow() => Show();
 
-        /// <summary>Lệnh ẩn Palette (gõ MCG_Hide trong CAD)</summary>
-        [CommandMethod("MCG_Hide", CommandFlags.Modal)]
+        /// <summary>Lệnh ẩn Palette (gõ MCG_Checklist_Hide trong CAD)</summary>
+        [CommandMethod("MCG_Checklist_Hide", CommandFlags.Modal)]
         public void McgHide() => Hide();
 
         #endregion

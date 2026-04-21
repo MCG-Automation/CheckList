@@ -4,6 +4,28 @@
 
 ---
 
+## Session 2026-04-21 (3) — Đổi PaletteGuid và tên lệnh cho CheckList (tránh conflict với FittingManagement)
+
+### Đã làm
+- [Commands/PaletteManager.cs](Commands/PaletteManager.cs):
+  - `PaletteGuid`: `2b80cfe9-c560-49d6-8a09-9d636260fcf2` → `7b3e9a2c-4d81-4f75-a63e-5c29d8b41f07` (GUID v4 mới, riêng cho CheckList).
+  - `[CommandMethod("MCG_Show")]` → `[CommandMethod("MCG_Checklist_Show")]`.
+  - `[CommandMethod("MCG_Hide")]` → `[CommandMethod("MCG_Checklist_Hide")]`.
+- [CLAUDE.md](CLAUDE.md): cập nhật §9 (GUID sample) và dòng danh sách "Lệnh CAD".
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- **Mục đích:** cho phép load đồng thời plugin CheckList và plugin FittingManagement trong cùng phiên AutoCAD mà không xung đột palette/command.
+
+### Bước tiếp theo
+- Build + test: load cả 2 plugin trong AutoCAD, gõ `MCG_Show` (mở FittingManagement) và `MCG_Checklist_Show` (mở CheckList) để xác nhận 2 PaletteSet riêng biệt.
+
+### Ghi chú API
+- GUID quyết định AutoCAD nhớ vị trí dock — đã deploy trước đó với GUID cũ, việc đổi sẽ reset vị trí dock lần đầu user chạy version mới.
+- `[CommandMethod]` attribute phải unique trong toàn bộ runtime AutoCAD — plugin load sau sẽ override nếu trùng tên.
+
+---
+
 ## Session 2026-04-21 (2) — Tách CheckList thành repo riêng
 
 ### Đã làm
