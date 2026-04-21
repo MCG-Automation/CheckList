@@ -4,11 +4,7 @@ using System.Drawing;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
 using Exception = System.Exception;
-using MCGCadPlugin.Views.DetailDesign;
 using MCGCadPlugin.Views.FittingManagement;
-using MCGCadPlugin.Views.PanelData;
-using MCGCadPlugin.Views.TableOfContent;
-using MCGCadPlugin.Views.Weight;
 using MCGCadPlugin.Views.CheckList;
 
 namespace MCGCadPlugin.Commands
@@ -118,7 +114,7 @@ namespace MCGCadPlugin.Commands
         #region Private Methods
 
         /// <summary>
-        /// Khởi tạo PaletteSet và tất cả 5 tabs.
+        /// Khởi tạo PaletteSet và 2 tabs (Fitting Management, CheckList).
         /// Chỉ chạy 1 lần duy nhất trong vòng đời plugin.
         /// </summary>
         private void Initialize()
@@ -129,12 +125,8 @@ namespace MCGCadPlugin.Commands
             _paletteSet = new PaletteSet("MCG Plugins", PaletteGuid);
 
             // 2. Nạp nội dung — PHẢI thực hiện TRƯỚC khi set Dock/Size
-            _paletteSet.AddVisual("Detail Design",      new DetailDesignView());
             _paletteSet.AddVisual("Fitting Management", new FittingManagementView());
-            _paletteSet.AddVisual("Panel Data",         new PanelDataView());
-            _paletteSet.AddVisual("Table of Content",   new TableOfContentView());
-            _paletteSet.AddVisual("Weight",             new WeightView());
-            _paletteSet.AddVisual("CheckList",      new QaChecklistView());
+            _paletteSet.AddVisual("CheckList",          new QaChecklistView());
 
             // 3. Thiết lập thuộc tính — SAU AddVisual
             _paletteSet.DockEnabled = DockSides.Right | DockSides.Left;
@@ -143,7 +135,7 @@ namespace MCGCadPlugin.Commands
                               | PaletteSetStyles.Snappable;
             _paletteSet.KeepFocus = true;
 
-            Debug.WriteLine($"{LOG_PREFIX} PaletteSet khởi tạo THÀNH CÔNG — 6 tabs đã đăng ký.");
+            Debug.WriteLine($"{LOG_PREFIX} PaletteSet khởi tạo THÀNH CÔNG — 2 tabs đã đăng ký.");
         }
 
         #endregion
