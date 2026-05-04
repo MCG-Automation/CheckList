@@ -268,8 +268,7 @@ Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
 > cần tương tác với bản vẽ (pick point, select entity, zoom, v.v.)
 
 **Lệnh CAD:**
-- `MCG_Checklist_Show` → hiển thị PaletteSet
-- `MCG_Checklist_Hide` → ẩn PaletteSet
+- `MCG_Checklist` → hiển thị PaletteSet (ẩn bằng nút Close trên UI)
 
 ---
 

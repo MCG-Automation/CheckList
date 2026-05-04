@@ -4,6 +4,28 @@
 
 ---
 
+## Session 2026-05-04 (4) — Đơn giản hoá tên command CAD
+
+### Đã làm
+- [Commands/CheckListCommands.cs](Commands/CheckListCommands.cs):
+  - `[CommandMethod("MCG_Checklist_Show")]` → `[CommandMethod("MCG_Checklist")]` (bỏ hậu tố `_Show`).
+  - Xoá hẳn method `Hide()` và `[CommandMethod("MCG_Checklist_Hide")]`. Class giờ chỉ còn 1 lệnh CAD duy nhất.
+- [CLAUDE.md](CLAUDE.md) (mục 9 — Lệnh CAD): cập nhật danh sách lệnh thành chỉ `MCG_Checklist`, kèm note "ẩn bằng nút Close trên UI".
+- `PaletteManager.Hide()` (method) **giữ nguyên** — vẫn được gọi từ `BtnClosePalette_Click` trong [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs). Chỉ bỏ `[CommandMethod]` wrapper.
+- Build: `dotnet build -c Debug` → 0 warnings, 0 errors.
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- **Lệnh CAD chính thức:** chỉ còn `MCG_Checklist` (mở Palette). Đóng Palette = nút Close trên UI.
+
+### Bước tiếp theo
+- Test trong AutoCAD: gõ `MCG_Checklist` → Palette mở; bấm nút Close → Palette ẩn. Gõ `MCG_Checklist_Show` / `MCG_Checklist_Hide` → "Unknown command" (đúng kỳ vọng).
+
+### Ghi chú API
+- Bỏ `[CommandMethod]` không xoá method khỏi class — chỉ bỏ đăng ký lệnh CAD. Method `PaletteManager.Hide()` vẫn callable từ code C#.
+
+---
+
 ## Session 2026-05-04 (3) — Fix 4 build warnings
 
 ### Đã làm

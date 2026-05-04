@@ -15,31 +15,14 @@ namespace MCGCadPlugin.Commands
     {
         private const string LOG_PREFIX = "[CheckListCommands]";
 
-        /// <summary>Lệnh hiển thị Palette (gõ MCG_Checklist_Show trong CAD)</summary>
-        [CommandMethod("MCG_Checklist_Show", CommandFlags.Modal)]
+        /// <summary>Lệnh hiển thị Palette (gõ MCG_Checklist trong CAD)</summary>
+        [CommandMethod("MCG_Checklist", CommandFlags.Modal)]
         public void Show()
         {
-            Debug.WriteLine($"{LOG_PREFIX} Lệnh MCG_Checklist_Show được gọi.");
+            Debug.WriteLine($"{LOG_PREFIX} Lệnh MCG_Checklist được gọi.");
             try
             {
                 PaletteManager.Instance.Show();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"{LOG_PREFIX} LỖI: {ex.Message}");
-                Debug.WriteLine($"{LOG_PREFIX} Stack trace:\n{ex.StackTrace}");
-                throw;
-            }
-        }
-
-        /// <summary>Lệnh ẩn Palette (gõ MCG_Checklist_Hide trong CAD)</summary>
-        [CommandMethod("MCG_Checklist_Hide", CommandFlags.Modal)]
-        public void Hide()
-        {
-            Debug.WriteLine($"{LOG_PREFIX} Lệnh MCG_Checklist_Hide được gọi.");
-            try
-            {
-                PaletteManager.Instance.Hide();
             }
             catch (Exception ex)
             {
