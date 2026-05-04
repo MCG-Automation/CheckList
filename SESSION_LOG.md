@@ -4,6 +4,75 @@
 
 ---
 
+## Session 2026-05-04 (3) — Fix 4 build warnings
+
+### Đã làm
+[MCGCadPlugin.csproj](MCGCadPlugin.csproj):
+- **Fix Fody warning**: Xoá `<IncludeAssets>` trong `PackageReference Costura.Fody` (giữ `<PrivateAssets>all</PrivateAssets>`). Theo khuyến nghị chính thức của Fody.
+- **Fix MSB3073 (PowerShell exit 9009)**: Xoá hẳn `<Target Name="UpdatePackageContents">` (cũ, lines 25-49). Lý do: file `PackageContents.xml` không tồn tại trong repo → target dead code; multi-line PS Exec command gây cmd.exe parse fail.
+- **Hạ MSB3061 (DLL bị AutoCAD khoá)**: Thêm `<MSBuildWarningsAsMessages>MSB3061</MSBuildWarningsAsMessages>`. Build mới dùng timestamp filename nên không thực sự bị block — đây chỉ là noise khi MSBuild cố cleanup DLL cũ. Hạ thành message.
+- Build: `dotnet build -c Debug` → **0 warnings, 0 errors**.
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- Build hoàn toàn sạch.
+
+### Bước tiếp theo
+- Tiếp tục các task Phase 1 (chưa xác định cụ thể).
+
+### Ghi chú API
+- **MSB3061 từ AutoCAD lock**: tới từ MSBuild's `IncrementalClean` cố xoá output cũ. Không thể fix bằng config thuần — chỉ có thể (a) đóng AutoCAD trước khi build, hoặc (b) suppress qua `MSBuildWarningsAsMessages`. Đã chọn (b).
+- **`MSBuildWarningsAsMessages` vs `NoWarn`**: `NoWarn` ẩn hoàn toàn; `MSBuildWarningsAsMessages` chuyển warning thành message (vẫn hiển thị nếu verbosity đủ cao). Chọn cái sau để giữ visibility khi cần debug.
+- **Costura.Fody best practice**: chỉ cần `<PrivateAssets>all</PrivateAssets>`. Đặt `<IncludeAssets>` thiếu `compile` sẽ phát warning ở MSBuild restore phase.
+
+---
+
+## Session 2026-05-04 (2) — Bỏ tính năng QA Stamp trên bản vẽ
+
+### Đã làm
+- Xoá file [Services/CheckList/CheckList.Stamp.cs](Services/CheckList/CheckList.Stamp.cs) (cũ): bỏ `GenerateQaStamp()` và `PurgeFakeQaStamps()`.
+- [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs):
+  - `RefreshStatus()` (else branch): bỏ call `_acService.PurgeFakeQaStamps()` và comment AUTO-PURGE.
+  - `BtnReset_Click`: bỏ call `_acService.PurgeFakeQaStamps()`; sửa MessageBox `"QA/QC data and CAD stamps cleared successfully."` → `"QA/QC data cleared successfully."`.
+  - `BtnApprove_Click`: bỏ call `_acService.GenerateQaStamp()`. MessageBox `"Drawing successfully Approved and Signed!"` giữ nguyên (đủ feedback theo user xác nhận).
+- Build: `dotnet build -c Debug` → 0 errors.
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- **Lý do bỏ:** stamp MText trên layer Defpoints chỉ là visual mark + chống giả mạo. Status APPROVED thực sự nằm trong XRecord (CheckList.Database.cs); không có code nào check status qua sự tồn tại của MText. Bỏ đi không phá nghiệp vụ.
+- **Tradeoff đã chấp nhận:** mất visible mark trên bản vẽ — người mở file phải mở Palette để biết status.
+
+### Bước tiếp theo
+- Test trong AutoCAD: Approve drawing → chỉ thấy MessageBox, không có MText "CheckList Passed" sinh ra trên layer Defpoints. Reset → data XRecord được xoá, không cần purge MText.
+
+### Ghi chú API
+- `partial class AutoCadService` được tách 3 file (Main / Database / Stamp). Xoá Stamp.cs an toàn vì 2 file còn lại không tham chiếu chéo.
+- Layer `Defpoints` là layer hệ thống AutoCAD, luôn tồn tại — không cần code tự tạo.
+
+---
+
+## Session 2026-05-04 — Fix MissingMethodException khi gõ lệnh CAD
+
+### Đã làm
+- Tạo mới [Commands/CheckListCommands.cs](Commands/CheckListCommands.cs): class `CheckListCommands` với public parameterless ctor, chứa 2 `[CommandMethod]` (`MCG_Checklist_Show` / `MCG_Checklist_Hide`) — uỷ quyền cho `PaletteManager.Instance`.
+- [Commands/PaletteManager.cs](Commands/PaletteManager.cs): xoá block `#region AutoCAD Commands` (bỏ `McgShow`/`McgHide`); xoá `using Autodesk.AutoCAD.Runtime;` không còn dùng. Singleton giờ thuần Palette logic.
+- Build: `dotnet build -c Debug` → 0 errors.
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- **Lỗi đã sửa:** `System.MissingMethodException: No parameterless constructor defined for this object` ném từ `Activator.CreateInstance` trong `PerDocumentCommandClass.Invoke`. Nguyên nhân: `[CommandMethod]` đặt trên instance method của Singleton (ctor private) — AutoCAD không thể tạo instance per-document.
+
+### Bước tiếp theo
+- User đóng AutoCAD (DLL đang bị khoá theo warning build), build lại, NETLOAD DLL mới, gõ `MCG_Checklist_Show` / `MCG_Checklist_Hide` để xác nhận hết lỗi.
+- Nếu OK → tiếp tục các task Phase 1.
+
+### Ghi chú API
+- **AutoCAD `[CommandMethod]` trên instance method** → AutoCAD luôn `Activator.CreateInstance(type)` để tạo instance mới mỗi lần gọi. Class command BẮT BUỘC có public parameterless constructor.
+- Pattern chuẩn cho Singleton + Commands: tách 2 class. Singleton (ctor private) lo state/lifecycle; class Commands riêng (ctor public mặc định) chỉ uỷ quyền sang Singleton.
+- Alternative: dùng `static` cho method `[CommandMethod]` thì không cần instance — nhưng vẫn tách class command riêng để giữ SRP.
+
+---
+
 ## Session 2026-04-21 (4) — Rename plugin (CheckList)
 
 ### Đã làm

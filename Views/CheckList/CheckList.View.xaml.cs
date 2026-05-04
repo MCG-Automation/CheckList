@@ -63,8 +63,6 @@ namespace MCGCadPlugin.Views.CheckList
             }
             else
             {
-                // [AUTO-PURGE]: Xóa các QA Stamp giả còn sót trong bản vẽ
-                _acService.PurgeFakeQaStamps();
                 CboDiscipline.IsEnabled = true;
                 ResetUIStatus();
             }
@@ -99,10 +97,9 @@ namespace MCGCadPlugin.Views.CheckList
                 if (_acService.DeleteChecklistFromDwg())
                 {
                     _currentDoc = null;
-                    _acService.PurgeFakeQaStamps();
                     HideChecklistPanel();
                     RefreshStatus();
-                    MessageBox.Show("QA/QC data and CAD stamps cleared successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("QA/QC data cleared successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -275,7 +272,6 @@ namespace MCGCadPlugin.Views.CheckList
 
             if (_acService.SaveChecklistToDwg(_currentDoc))
             {
-                _acService.GenerateQaStamp();
                 MessageBox.Show("Drawing successfully Approved and Signed!", "QA Passed", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 HideChecklistPanel();

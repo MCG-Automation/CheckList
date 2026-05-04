@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
 using Exception = System.Exception;
 using MCGCadPlugin.Views.CheckList;
@@ -95,18 +94,6 @@ namespace MCGCadPlugin.Commands
             if (IsVisible) Hide();
             else Show();
         }
-
-        #endregion
-
-        #region AutoCAD Commands
-
-        /// <summary>Lệnh hiển thị Palette (gõ MCG_Checklist_Show trong CAD)</summary>
-        [CommandMethod("MCG_Checklist_Show", CommandFlags.Modal)]
-        public void McgShow() => Show();
-
-        /// <summary>Lệnh ẩn Palette (gõ MCG_Checklist_Hide trong CAD)</summary>
-        [CommandMethod("MCG_Checklist_Hide", CommandFlags.Modal)]
-        public void McgHide() => Hide();
 
         #endregion
 
