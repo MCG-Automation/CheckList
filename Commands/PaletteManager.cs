@@ -108,7 +108,7 @@ namespace MCGCadPlugin.Commands
             Debug.WriteLine($"{LOG_PREFIX} Bắt đầu khởi tạo PaletteSet...");
 
             // 1. Tạo PaletteSet với GUID cố định
-            _paletteSet = new PaletteSet("MCGCadPlugin - CheckList", PaletteGuid);
+            _paletteSet = new PaletteSet("MCG Checklist", PaletteGuid);
 
             // 2. Nạp nội dung — PHẢI thực hiện TRƯỚC khi set Dock/Size
             _paletteSet.AddVisual("CheckList", new QaChecklistView());

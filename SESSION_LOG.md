@@ -4,6 +4,34 @@
 
 ---
 
+## Session 2026-05-07 — Align convention naming + bundle path với HTML guide deploy
+
+### Đã làm
+- [MCGCadPlugin.csproj](MCGCadPlugin.csproj): `<PluginName>MCGCadPlugin.CheckList</PluginName>` → `<PluginName>MCG_Checklist</PluginName>`. DLL output đổi thành `MCG_Checklist.dll` (Release) / `MCG_Checklist_<timestamp>.dll` (Debug). Khớp wildcard `MCG_*.dll` mà bat trong HTML guide quét.
+- [CLAUDE.md](CLAUDE.md) mục 2: `Bundle folder: %APPDATA%\Autodesk\ApplicationPlugins\` → `%PROGRAMDATA%\Autodesk\ApplicationPlugins\`. Khớp với bat shared `Install_AutoLoadCadAddin.bat` (HTML guide) — All Users, gộp tất cả `MCG_*.dll` vào 1 bundle `MCG_Plugin.bundle`.
+- [Commands/PaletteManager.cs](Commands/PaletteManager.cs): PaletteSet title `"MCGCadPlugin - CheckList"` → `"MCG Checklist"`.
+- Build: `dotnet build -c Debug` → 0 warnings, 0 errors. DLL output: `MCG_Checklist_20260507_142632.dll`.
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- **Convention chính thức (deploy artifacts):**
+  - DLL: `MCG_<Module>.dll` (Release) / `MCG_<Module>_<timestamp>.dll` (Debug). Module hiện tại: `Checklist`.
+  - PaletteSet title: `MCG <Module>` (vd: `"MCG Checklist"`).
+  - Lệnh CAD: `MCG_<Module>` (đã có: `MCG_Checklist`).
+  - Bundle: gộp **shared bundle** `MCG_Plugin.bundle` ở `%PROGRAMDATA%\Autodesk\ApplicationPlugins\` (Option Y — bat shared scan toàn bộ `MCG_*.dll` trên drive, do team Dev đồng bộ).
+  - C# namespace giữ nguyên `MCGCadPlugin.<Layer>.<Module>` (theo CLAUDE.md mục 3) — namespace là cấu trúc code, độc lập với DLL filename.
+
+### Bước tiếp theo
+- User test: đóng AutoCAD, build lại, copy `MCG_Checklist*.dll` vào `C:\CustomTools\Autocad\`, chạy `Install_AutoLoadCadAddin.bat` (Run as Admin). Mở AutoCAD → kiểm tra autoload, gõ `MCG_Checklist` → Palette title hiển thị `"MCG Checklist"`.
+- Bundle cũ `MCGCadPlugin.CheckList.bundle` (nếu đã từng deploy) cần xoá tay ở `%PROGRAMDATA%\Autodesk\ApplicationPlugins\` để tránh load song song hai version.
+
+### Ghi chú API
+- HTML guide `MCGVN_Autocad_Inventor_Installation_Guide.html` **không sửa** — đây là guide generic cho team Dev (1 bat shared cho tất cả MCG plugin). Plugin phải align convention vào guide, không ngược lại.
+- `<PluginName>` trong csproj điều khiển `<AssemblyName>` (qua condition Debug/Release ở [csproj:16-17](MCGCadPlugin.csproj#L16-L17)) — đổi 1 chỗ, kéo theo DLL filename + bundle scan + load dynamic.
+- Khi đổi PaletteSet title nhưng GUID giữ nguyên (`7b3e9a2c-...`) → AutoCAD vẫn nhớ vị trí dock cũ; chỉ tên hiển thị thay đổi.
+
+---
+
 ## Session 2026-05-04 (4) — Đơn giản hoá tên command CAD
 
 ### Đã làm

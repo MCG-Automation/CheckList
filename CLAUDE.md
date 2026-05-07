@@ -31,7 +31,7 @@ API DLLs       : C:\Program Files\Autodesk\AutoCAD 2023\acmgd.dll
                  C:\Program Files\Autodesk\AutoCAD 2023\acdbmgd.dll
                  C:\Program Files\Autodesk\AutoCAD 2023\accoremgd.dll
 Output         : AutoCAD Plugin (.dll + .bundle)
-Bundle folder  : %APPDATA%\Autodesk\ApplicationPlugins\
+Bundle folder  : %PROGRAMDATA%\Autodesk\ApplicationPlugins\
 Build          : dotnet build -c Debug (chạy với quyền Administrator)
 ```
 
