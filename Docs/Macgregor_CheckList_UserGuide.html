@@ -112,7 +112,7 @@
 <div class="container">
     <h1>HƯỚNG DẪN SỬ DỤNG MACGREGOR CHECKLIST</h1>
     
-    <p>Chào mừng bạn đến với tài liệu hướng dẫn sử dụng công cụ <strong>MacGregor Checklist</strong>. Add-in này được thiết kế để chuẩn hóa và tự động hóa quy trình kiểm tra bản vẽ (Quality Assurance / Quality Control) trực tiếp trên nền tảng <strong>AutoCAD</strong> và <strong>Autodesk Inventor</strong> trước khi phát hành (Release) lên hệ thống Vault.</p>
+    <p>Chào mừng bạn đến với tài liệu hướng dẫn sử dụng công cụ <strong>MacGregor Checklist</strong>. Add-in này được thiết kế để chuẩn hóa và tự động hóa quy trình kiểm tra bản vẽ (Quality Assurance / Quality Control) trực tiếp trên nền tảng <strong>AutoCAD</strong> trước khi phát hành (Release) lên hệ thống Vault. <em>(Phiên bản Inventor: roadmap.)</em></p>
 
     <div class="note">
         <strong>Lưu ý về Phân loại Bản vẽ:</strong> Công cụ Checklist này <strong>CHỈ BẮT BUỘC</strong> đối với các <strong>Bản vẽ Main (Bản vẽ cuối cùng cần Release)</strong>. Đối với các bản vẽ Global (WIP) dùng để chia sẻ và phối hợp nhóm, kỹ sư có thể bỏ qua bước kiểm tra này.
@@ -121,12 +121,13 @@
     <h2>1. Hướng dẫn Cài đặt & Khởi chạy (Dành cho Người dùng)</h2>
     
     <h3><span class="badge cad">AutoCAD</span> Đối với người dùng AutoCAD</h3>
+    <p><strong>Cách 1 — Auto-load qua bộ cài (khuyến nghị cho người dùng cuối):</strong> sau khi IT chạy <code>Install_AutoLoadCadAddin.bat</code>, plugin được copy vào <code>%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\</code>. AutoCAD tự nạp plugin mỗi lần khởi động — bạn chỉ cần gõ <code>MCG_Checklist</code> để mở Palette.</p>
+    <p><strong>Cách 2 — NETLOAD thủ công (dùng khi test/debug):</strong></p>
     <ol>
-        <li>Tải file <code>MCGCadPlugin.dll</code> về máy và lưu ở một vị trí cố định (VD: <code>C:\Customtools\</code>).</li>
-        <li>Mở phần mềm AutoCAD và mở một bản vẽ bất kỳ.</li>
-        <li>Gõ lệnh <code>NETLOAD</code> vào thanh Command Line và nhấn Enter.</li>
-        <li>Duyệt đến thư mục lưu trữ, chọn file <code>MCGCadPlugin.dll</code> và nhấn <strong>Open</strong>. (Nếu có bảng cảnh báo bảo mật hiện ra, hãy chọn <em>Always Load</em>).</li>
-        <li>Sau khi load thành công, gõ lệnh mở giao diện (VD: <code>MCG_Fitting</code> - tùy thuộc vào tên lệnh khai báo trong tool) để gọi thanh Palette lên màn hình.</li>
+        <li>Lấy file <code>MCG_Checklist.dll</code> (bản Release) hoặc <code>MCG_Checklist_&lt;timestamp&gt;.dll</code> (bản Debug) và lưu vào vị trí cố định (VD: <code>C:\CustomTools\Autocad\</code>).</li>
+        <li>Mở AutoCAD và mở một bản vẽ bất kỳ.</li>
+        <li>Gõ lệnh <code>NETLOAD</code> trên Command Line, duyệt đến file DLL và bấm <strong>Open</strong>. (Nếu có cảnh báo bảo mật, chọn <em>Always Load</em>.)</li>
+        <li>Gõ lệnh <code>MCG_Checklist</code> để mở Palette. Đóng Palette bằng nút <strong>Close (×)</strong> trên giao diện.</li>
     </ol>
 
     
@@ -150,9 +151,9 @@
 
     <h3>Bước 3: Ký duyệt (Sign & Approve)</h3>
     <ul>
-        <li>Khi bạn đã tick đủ <strong>100%</strong> các mục, nút <strong>SIGN & APPROVE DRAWING</strong> sẽ sáng lên màu xanh.</li>
-        <li>Bấm vào nút này để chốt kiểm tra. Hệ thống sẽ lưu Tên máy tính của bạn và Thời gian duyệt vào hệ thống.</li>
-        <li><strong>Kết quả:</strong> Một dòng chữ màu xanh lá <strong>CheckList Passed</strong> sẽ tự động được chèn vào góc tọa độ (0,0) trên lớp mực Không in (Defpoints / Non-plotting layer) của bản vẽ.</li>
+        <li>Khi bạn đã tick đủ <strong>100%</strong> các mục, nút <strong>SIGN &amp; APPROVE</strong> sẽ sáng lên màu xanh.</li>
+        <li>Bấm vào nút này để chốt kiểm tra. Hệ thống ghi Tên Windows User và Thời gian duyệt vào dữ liệu ẩn của bản vẽ (DBDictionary <code>MACGREGOR_QA_SYSTEM</code>).</li>
+        <li><strong>Kết quả:</strong> Một MessageBox <em>"Drawing successfully Approved and Signed!"</em> hiện lên xác nhận. Header DRAWING STATUS trên Palette chuyển sang <strong>APPROVED (READY FOR RELEASE)</strong> kèm tên người duyệt và thời gian; toàn bộ checklist bị khoá để tránh chỉnh sửa nhầm.</li>
     </ul>
 
     <div class="success-box">
@@ -160,12 +161,22 @@
     </div>
 
     <div class="admin-section">
-        <h2>3. Tích hợp Vault: Tự động hóa chặn Release 100% (Dành cho IT / Vault Admin)</h2>
-        <p>Hiện tại, Kỹ sư đã có công cụ để thực hiện Checklist. Để hệ thống đạt mức tự động hóa 100%, chúng ta cần <strong>ngăn chặn (block)</strong> người duyệt bấm nút chuyển trạng thái sang <strong>Released</strong> trên Vault nếu bản vẽ Main đó chưa được Approve.</p>
-        
-        <p>Vì Add-in không có quyền can thiệp vào máy chủ Vault, bộ phận IT / Vault Admin vui lòng thực hiện 3 bước cấu hình nhanh gọn sau đây trên giao diện Vault Professional (Chỉ mất khoảng 5 phút):</p>
+        <h2>3. Tích hợp Vault: Tự động hóa chặn Release 100% <span style="background:#FFB300;color:white;font-size:13px;padding:4px 10px;border-radius:4px;margin-left:8px;vertical-align:middle;letter-spacing:0.5px;">ROADMAP — CHƯA TRIỂN KHAI</span></h2>
+        <div class="note">
+            <strong>⚠ Trạng thái hiện tại:</strong> Add-in mới chỉ lưu Checklist data vào <strong>dữ liệu ẩn nội bộ</strong> của file DWG (DBDictionary <code>MACGREGOR_QA_SYSTEM</code> + XRecord <code>CHECKLIST_DATA</code>). Vault <strong>không đọc trực tiếp</strong> được DBDictionary vì nó không phải iProperty/DwgProperty. Cần triển khai thêm một <em>bridge property</em> ở phía Add-in (Bước 0 dưới đây) trước khi Vault Admin thực hiện cấu hình mapping. Phần này được giữ ở đây làm <strong>bản thiết kế tham chiếu cho team Dev</strong>.
+        </div>
+        <p>Mục tiêu: hệ thống đạt tự động hóa 100% — <strong>ngăn chặn (block)</strong> người duyệt bấm chuyển trạng thái sang <strong>Released</strong> trên Vault nếu bản vẽ Main chưa được Approve.</p>
+
+        <p>Quy trình triển khai trong tương lai gồm 4 bước (Bước 0 do Dev, Bước 1–3 do IT/Vault Admin):</p>
 
         <ol>
+            <li><strong>Bước 0 — Thêm bridge property trong Add-in (Dev):</strong>
+                <ul>
+                    <li>Khi user bấm Approve thành công, Add-in ghi giá trị <code>"APPROVED"</code> vào một Custom Drawing Property tên <code>MacGregor_QA</code> (qua <code>Database.SummaryInfo</code> hoặc <code>DwgProperty</code>).</li>
+                    <li>Đây là property mà Vault có thể đọc được. DBDictionary nội bộ vẫn giữ làm dữ liệu chính cho UI; bridge property chỉ là "cờ" cho Vault.</li>
+                    <li>Khi user bấm Reset, đồng thời xoá luôn property này (hoặc set về rỗng).</li>
+                </ul>
+            </li>
             <li><strong>Tạo thuộc tính trên Vault:</strong>
                 <ul>
                     <li>Vào <em>Tools > Administration > Vault Settings > Behaviors > Properties</em>.</li>
@@ -176,8 +187,8 @@
                 <ul>
                     <li>Chuyển sang tab <strong>Mapping</strong> của Property vừa tạo.</li>
                     <li>Cấu hình Entity: <code>File</code>.</li>
-                    <li>Provider: Chọn <code>AutoCAD</code> hoặc <code>Inventor</code>.</li>
-                    <li>File Property: Nhập chính xác tên biến là <code>MacGregor_QA</code> (Đây là biến ẩn mà Add-in CAD tự sinh ra khi Kỹ sư bấm Approve).</li>
+                    <li>Provider: Chọn <code>AutoCAD</code>.</li>
+                    <li>File Property: Nhập chính xác tên biến là <code>MacGregor_QA</code> (chính là bridge property mà Bước 0 sinh ra).</li>
                     <li>Direction: <code>File -> Vault</code>.</li>
                 </ul>
             </li>
@@ -189,27 +200,47 @@
                 </ul>
             </li>
         </ol>
-        <p><em>Kết quả: Khi người duyệt bấm "Change State -> Released" cho một bản vẽ chưa làm Checklist, Vault sẽ hiện bảng lỗi màu đỏ chặn lại yêu cầu Kỹ sư phải mở CAD lên tick Checklist. Quy trình khép kín hoàn toàn!</em></p>
+        <p><em>Kết quả khi hoàn thành cả 4 bước: Khi người duyệt bấm "Change State -> Released" cho một bản vẽ chưa làm Checklist, Vault sẽ hiện bảng lỗi màu đỏ chặn lại, yêu cầu Kỹ sư phải mở CAD lên tick Checklist. Quy trình khép kín hoàn toàn.</em></p>
     </div>
 
     <h2>4. Câu hỏi thường gặp (FAQ) & Khắc phục sự cố</h2>
 
-    <div class="faq-question">Q: Tôi đã load Add-in trong Inventor nhưng không thấy Tab MacGregor xuất hiện?</div>
+    <div class="faq-question">Q1: Tôi gõ <code>MCG_Checklist</code> nhưng AutoCAD báo "Unknown command"?</div>
     <div class="faq-answer">
-        A: Hãy vào mục <strong>Tools > Add-Ins</strong> trong Inventor. Tìm tên <code>MacGregor Fitting Tools</code>. Hãy đảm bảo rằng bạn đã tick chọn vào 2 ô: <strong>Loaded/Unloaded</strong> và <strong>Load Automatically</strong> ở góc dưới bên phải, sau đó bấm OK.
+        A: Plugin chưa được nạp vào phiên AutoCAD. Kiểm tra theo thứ tự:
+        <ol>
+            <li>Nếu dùng auto-load: kiểm tra folder <code>%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\Contents\</code> có chứa <code>MCG_Checklist*.dll</code> không. Nếu không, chạy lại <code>Install_AutoLoadCadAddin.bat</code> với quyền Administrator và <strong>khởi động lại AutoCAD</strong>.</li>
+            <li>Nếu dùng NETLOAD thủ công: gõ lại <code>NETLOAD</code> và chọn đúng file <code>MCG_Checklist.dll</code> (tên DLL phải bắt đầu bằng <code>MCG_</code> để hệ thống nhận diện).</li>
+            <li>Nếu vẫn lỗi: mở <strong>DebugView</strong> hoặc Output window, tìm log có prefix <code>[PaletteManager]</code>, <code>[CheckListCommands]</code> để xem lỗi cụ thể.</li>
+        </ol>
     </div>
 
-    <div class="faq-question">Q: Tôi có thể lách luật bằng cách Copy chữ "CheckList Passed" từ bản vẽ cũ sang bản vẽ mới được không?</div>
+    <div class="faq-question">Q2: Tôi đóng AutoCAD giữa chừng có mất dữ liệu Checklist không?</div>
     <div class="faq-answer">
-        A: <strong>Không thể.</strong> Hệ thống được trang bị thuật toán "Auto-Purge". Dù bạn có cố tình copy chữ đó sang bản vẽ mới, thì ngay khi bạn hoặc người duyệt mở Tab DRAWING lên, Tool sẽ quét dữ liệu ẩn ngầm. Nếu phát hiện thiếu lịch sử tick box, Tool sẽ tự động xóa sổ dòng chữ giả mạo đó ngay lập tức.
+        A: <strong>Không.</strong> Khi bạn bấm <strong>Save Draft</strong>, dữ liệu được lưu vào DBDictionary nội bộ của file DWG. Đóng AutoCAD, chuyển máy, gửi file qua email/USB — mở lại đều thấy nguyên trạng thái cũ vì dữ liệu nằm trong bản thân file <code>.dwg</code>, không phải file ngoài.
     </div>
 
-    <div class="faq-question">Q: Nếu tôi muốn sửa lại bản vẽ đã được "Sign & Approve" thì làm thế nào?</div>
+    <div class="faq-question">Q3: Làm thế nào tôi biết bản vẽ nào đã được Approve?</div>
     <div class="faq-answer">
-        A: Khi bản vẽ đã Approve, giao diện Checklist sẽ bị khóa. Để mở khóa, bạn hãy bấm vào nút <strong>Reset / Clear Data</strong> ở giao diện chính. Thao tác này sẽ xóa toàn bộ dữ liệu QA và xóa luôn con dấu trên bản vẽ, đưa bản vẽ về trạng thái ban đầu để bạn làm lại từ đầu.
+        A: Mở Palette bằng lệnh <code>MCG_Checklist</code>. Header <strong>DRAWING STATUS</strong> sẽ hiển thị 1 trong 2 trạng thái:
+        <ul>
+            <li><strong>APPROVED (READY FOR RELEASE)</strong> — màu xanh lá, kèm tên Windows User người duyệt và thời gian. Sẵn sàng Release lên Vault.</li>
+            <li><strong>PENDING / NOT STARTED</strong> — màu cam. Bạn cần chọn loại bản vẽ và mở Checklist để bắt đầu.</li>
+        </ul>
     </div>
 
-    <div class="faq-question">Q: Làm thế nào tôi biết bản vẽ nào là Main, bản vẽ nào là Global?</div>
+    <div class="faq-question">Q4: Nếu tôi muốn sửa lại bản vẽ đã được "Sign & Approve" thì làm thế nào?</div>
+    <div class="faq-answer">
+        A: Khi bản vẽ đã Approve, checklist bị khoá để tránh chỉnh nhầm. Để mở khoá:
+        <ol>
+            <li>Bấm nút <strong>Reset / Clear Data</strong> trên Palette.</li>
+            <li>Xác nhận trong dialog "Are you sure you want to clear all QA/QC data from this drawing?".</li>
+            <li>Toàn bộ dữ liệu QA bị xoá khỏi DBDictionary, bản vẽ trở lại trạng thái <strong>PENDING</strong>.</li>
+            <li>Bạn cần làm lại checklist từ đầu trước khi Approve lại.</li>
+        </ol>
+    </div>
+
+    <div class="faq-question">Q5: Làm thế nào tôi biết bản vẽ nào là Main, bản vẽ nào là Global?</div>
     <div class="faq-answer">
         A: Quy định đặt tên và cấu trúc thư mục bản vẽ Main và Global được quy định bởi quy trình nội bộ của phòng Thiết kế. Checklist hiện tại chỉ yêu cầu thực hiện thủ tục bắt buộc (Release) đối với bản vẽ Main.
     </div>

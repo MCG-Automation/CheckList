@@ -4,6 +4,36 @@
 
 ---
 
+## Session 2026-05-07 (2) — Update Macgregor_CheckList_UserGuide.html cho khớp hiện trạng
+
+### Đã làm
+[Docs/Macgregor_CheckList_UserGuide.html](Docs/Macgregor_CheckList_UserGuide.html) — 5 chỗ sửa:
+1. **Intro paragraph** ([line 115]): bỏ "và Autodesk Inventor" (plugin chỉ AutoCAD), thêm note "Phiên bản Inventor: roadmap".
+2. **Section 1 — Cài đặt** ([line 121-130]): tách thành 2 cách: (1) Auto-load qua `Install_AutoLoadCadAddin.bat` (khuyến nghị), (2) NETLOAD thủ công cho test/debug. Đổi `MCGCadPlugin.dll` → `MCG_Checklist.dll`. Đổi command ví dụ `MCG_Fitting` → `MCG_Checklist`.
+3. **Section 2 Bước 3 — Sign & Approve**: button label `SIGN & APPROVE DRAWING` → `SIGN & APPROVE`. **Xoá** mention về stamp "CheckList Passed" trên layer Defpoints (tính năng đã gỡ ở session 2026-05-04 (2)). Thay bằng mô tả trạng thái thực tế: MessageBox confirmation + header `APPROVED (READY FOR RELEASE)` trên Palette.
+4. **Section 3 — Vault integration**: thêm badge `ROADMAP — CHƯA TRIỂN KHAI` + warning box giải thích trạng thái hiện tại (DBDictionary nội bộ Vault không đọc được). Bổ sung **Bước 0** (Dev): viết bridge property `MacGregor_QA` vào `Database.SummaryInfo`/`DwgProperty` khi Approve để Vault map qua tên đó. 4 bước thay vì 3.
+5. **Section 4 — FAQ rewrite hoàn toàn**: xoá Q về Inventor + Q về "Auto-Purge stamp giả mạo" (tính năng đã gỡ). Thay bằng 5 Q mới khớp UI hiện tại:
+   - Q1: `MCG_Checklist` báo Unknown command — kiểm tra bundle/NETLOAD/log.
+   - Q2: Đóng AutoCAD giữa chừng có mất data không — không, lưu vào DBDictionary nội file DWG.
+   - Q3: Làm sao biết bản vẽ đã Approve — header DRAWING STATUS có 2 state APPROVED/PENDING.
+   - Q4: Sửa bản vẽ đã Approve — bấm Reset / Clear Data, mô tả flow cụ thể.
+   - Q5 (giữ nguyên): Phân biệt bản vẽ Main vs Global.
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- User guide nay đã đồng bộ với code thực tế: tên DLL `MCG_Checklist.dll`, lệnh `MCG_Checklist`, button `SIGN & APPROVE`, không còn mention QA Stamp / Auto-Purge.
+- Vault integration được giữ ở guide làm bản thiết kế tham chiếu (roadmap), không phải tính năng đã ship.
+
+### Bước tiếp theo
+- Khi implement Vault bridge property (Bước 0): viết vào `Database.SummaryInfo.SetCustomProperty("MacGregor_QA", "APPROVED")` trong `BtnSignApprove_Click` sau `SaveChecklistToDwg`. Reset thì xoá property.
+- Cân nhắc đổi badge color/style của ROADMAP nếu user feedback.
+
+### Ghi chú API
+- DBDictionary trong DWG (`MACGREGOR_QA_SYSTEM`/`CHECKLIST_DATA`) là dữ liệu nội bộ — Vault không đọc được. Vault chỉ map iProperty/Custom DwgProperty (qua `Database.SummaryInfo`).
+- Nếu sau này cần Vault integration: tách rõ 2 layer — DBDictionary cho UI/logic phong phú, DwgProperty cho 1 cờ trạng thái mà Vault đọc.
+
+---
+
 ## Session 2026-05-07 — Align convention naming + bundle path với HTML guide deploy
 
 ### Đã làm
