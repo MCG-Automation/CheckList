@@ -1,3 +1,9 @@
-﻿<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <!-- 
+    Costura sẽ tự động quét tất cả các PackageReference có Copy Local = True 
+    (bao gồm Newtonsoft.Json, ExcelDataReader, ExcelDataReader.DataSet) 
+    và đóng gói nén trực tiếp vào file MCGCadPlugin.dll đầu ra.
+  -->
   <Costura />
 </Weavers>

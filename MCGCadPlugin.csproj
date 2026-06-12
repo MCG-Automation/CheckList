@@ -1,52 +1,95 @@
-
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <!-- Target .NET Framework 4.8 tương thích với AutoCAD 2021-2024 -->
     <TargetFramework>net48</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <UseWPF>true</UseWPF>
-    <LangVersion>latest</LangVersion>
     <Platforms>x64</Platforms>
-    <PluginName>MCG_Checklist</PluginName>
-
-    <Timestamp>$([System.DateTime]::Now.ToString("yyyyMMdd_HHmmss"))</Timestamp>
-
-    <!-- Release: tên cố định | Debug: có timestamp -->
-    <AssemblyName Condition="'$(Configuration)' == 'Release'">$(PluginName)</AssemblyName>
-    <AssemblyName Condition="'$(Configuration)' != 'Release'">$(PluginName)_$(Timestamp)</AssemblyName>
-
-    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-
-    <!-- Hạ MSB3061 từ warning xuống message: AutoCAD thường khoá DLL cũ trong bin/Debug.
-         Build mới dùng timestamp filename nên không bị block, chỉ noise log. -->
-    <MSBuildWarningsAsMessages>MSB3061</MSBuildWarningsAsMessages>
+    <Configurations>Debug;Release</Configurations>
+    <LangVersion>9.0</LangVersion>
+    <!-- Khai báo để sử dụng giao diện WPF (XAML) -->
+    <UseWPF>true</UseWPF>
+    <RootNamespace>MCGCadPlugin</RootNamespace>
+    <!-- Tắt tự sinh AssemblyInfo để tránh conflict với file cấu hình cũ -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
+  <!-- Tạo hậu tố mốc thời gian cho Debug để tránh lock file -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <BuildTimestamp>$([System.DateTime]::Now.ToString("yyyyMMdd_HHmmss"))</BuildTimestamp>
+    <AssemblyName>MCGCadPlugin_$(BuildTimestamp)</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Cấu hình tên Assembly tĩnh chuẩn cho Release để thuận tiện đóng gói deploy -->
+  <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
+    <AssemblyName>MCGCadPlugin</AssemblyName>
+  </PropertyGroup>
+
+  <!-- ================================================================= -->
+  <!-- Tự động dò tìm thư mục chứa thư viện Vault Client SDK            -->
+  <!-- Đã chuẩn hóa loại bỏ chữ "Client" trong đường dẫn Autodesk       -->
+  <!-- ================================================================= -->
+  <PropertyGroup>
+    <VaultPath Condition="Exists('C:\Program Files\Autodesk\Vault Professional 2023\Explorer')">C:\Program Files\Autodesk\Vault Professional 2023\Explorer</VaultPath>
+    <VaultPath Condition="'$(VaultPath)' == '' and Exists('C:\Program Files\Autodesk\Vault Professional 2023 Client\Explorer')">C:\Program Files\Autodesk\Vault Professional 2023 Client\Explorer</VaultPath>
+    <VaultPath Condition="'$(VaultPath)' == '' and Exists('C:\Program Files\Autodesk\Vault Client 2023\Explorer')">C:\Program Files\Autodesk\Vault Client 2023\Explorer</VaultPath>
+    <VaultPath Condition="'$(VaultPath)' == '' and Exists('C:\Program Files\Autodesk\Vault Professional 2024\Explorer')">C:\Program Files\Autodesk\Vault Professional 2024\Explorer</VaultPath>
+    <VaultPath Condition="'$(VaultPath)' == '' and Exists('C:\Program Files\Autodesk\Vault Professional 2024 Client\Explorer')">C:\Program Files\Autodesk\Vault Professional 2024 Client\Explorer</VaultPath>
+    <VaultPath Condition="'$(VaultPath)' == '' and Exists('C:\Program Files\Autodesk\Vault Client 2024\Explorer')">C:\Program Files\Autodesk\Vault Client 2024\Explorer</VaultPath>
+    <!-- Giá trị dự phòng mặc định nếu không phát hiện được mục nào phía trên -->
+    <VaultPath Condition="'$(VaultPath)' == ''">C:\Program Files\Autodesk\Vault Professional 2023\Explorer</VaultPath>
+  </PropertyGroup>
+  <!-- ================================================================= -->
+
+  <!-- Group các thư viện tham chiếu cục bộ từ AutoCAD (Copy Local = False để tránh crash CAD) -->
   <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Management" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="System.Xaml" />
+    <Reference Include="acdbmgd">
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2023\acdbmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2023\acmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="accoremgd">
+      <HintPath>C:\Program Files\Autodesk\AutoCAD 2023\accoremgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 
+  <!-- ================================================================= -->
+  <!-- Tham chiếu động đến thư mục SDK Vault đã phân giải được ở trên   -->
+  <!-- ================================================================= -->
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="AutoCAD.NET" Version="23.1.0" ExcludeAssets="runtime" />
-    <PackageReference Include="AutoCAD.NET.Model" Version="23.1.0" ExcludeAssets="runtime" />
-    <PackageReference Include="AutoCAD.NET.Core" Version="23.1.0" ExcludeAssets="runtime" />
-    <PackageReference Include="MongoDB.Driver" Version="3.7.0" ExcludeAssets="runtime"/>
+    <Reference Include="Autodesk.Connectivity.WebServices">
+      <HintPath>$(VaultPath)\Autodesk.Connectivity.WebServices.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Autodesk.DataManagement.Client.Framework">
+      <HintPath>$(VaultPath)\Autodesk.DataManagement.Client.Framework.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Autodesk.DataManagement.Client.Framework.Vault">
+      <HintPath>$(VaultPath)\Autodesk.DataManagement.Client.Framework.Vault.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <!-- ================================================================= -->
 
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" ExcludeAssets="runtime" />
+  <!-- Group các NuGet Packages chính của dự án -->
+  <ItemGroup>
+    <PackageReference Include="Fody" Version="6.6.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Costura.Fody" Version="5.7.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    
+    <!-- Thư viện đọc tệp Excel gọn nhẹ cho .NET Framework 4.8 -->
+    <PackageReference Include="ExcelDataReader" Version="3.6.0" />
+    <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
   </ItemGroup>
 
 </Project>

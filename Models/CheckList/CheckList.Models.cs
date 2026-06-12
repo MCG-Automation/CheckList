@@ -123,6 +123,13 @@ namespace MCGCadPlugin.Models.CheckList
         public string ApprovedBy { get; set; } // Tên User Windows đã ký duyệt
         public string ApprovedDate { get; set; } // Ngày giờ ký duyệt
 
+        // ================================================================= -->
+        // THÊM MỚI: Thuộc tính Metadata trích xuất trực tiếp từ file Excel   -->
+        // ================================================================= -->
+        public string ProjectNo { get; set; }  // Mã số dự án (ví dụ: 4111736)
+        public string PanelName { get; set; }  // Mã phân đoạn/cấu kiện (ví dụ: 4D-01C)
+        // ================================================================= -->
+
         public List<ChecklistItem> Items { get; set; } // Danh sách các câu hỏi
 
         public ChecklistDocument()
