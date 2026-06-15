@@ -55,17 +55,9 @@ namespace MCGCadPlugin.Services.CheckList
                     targetLocalPath = _vaultSyncService.SyncExcelFile(filePathOrName, settings);
                 }
 
-                // Kiểm tra file thực tế trước khi Parse để tránh lỗi FileNotFound chung chung
-                if (!File.Exists(targetLocalPath))
-                {
-                    string sourceInfo = useVault ? "Vault (and local fallback)" : "Local path";
-                    throw new FileNotFoundException(
-                        $"Checklist file not found via {sourceInfo}.\n\n" +
-                        $"Target Path: {targetLocalPath}\n\n" +
-                        "Please ensure:\n1. You are logged into Autodesk Access (SSO).\n2. The Vault path in settings.json is correct.\n3. The file exists on the server.");
-                }
-
                 // 2. Phân tích tệp Excel tại đường dẫn cục bộ đích để lấy Metadata và danh sách câu hỏi mẫu mới nhất
+                // Lưu ý: _excelParser.Parse đã tích hợp sẵn cơ chế Fallback (giải nén từ Resource) nếu không tìm thấy file
+                // nên không cần kiểm tra File.Exists tại đây để tránh ngăn cản logic dự phòng.
                 var newDoc = _excelParser.Parse(targetLocalPath);
 
                 // 3. Thử tải dữ liệu cache cũ từ bộ nhớ JSON dựa trên ProjectNo, PanelName, Discipline

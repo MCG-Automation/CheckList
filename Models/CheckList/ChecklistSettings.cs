@@ -1,3 +1,5 @@
+using System;
+
 namespace MCGCadPlugin.Models.CheckList
 {
     /// <summary>
@@ -13,10 +15,10 @@ namespace MCGCadPlugin.Models.CheckList
         public string VaultName { get; set; } = "MacGregor_CAS";
 
         /// <summary>Đường dẫn ảo tương đối của thư mục chứa các biểu mẫu Excel trên Vault Server</summary>
-        public string VaultExcelFolderPath { get; set; } = "$/Designs/90 Users/truonph";
+        public string VaultExcelFolderPath { get; set; } = $"$/Designs/90 Users/{Environment.UserName}";
 
         /// <summary>Thư mục làm việc cục bộ đồng bộ chính xác theo liên kết động trên máy người dùng</summary>
-        public string LastExcelFolder { get; set; } = @"C:\MacGregor_CAS_WF\Designs\90 Users\truonph";
+        public string LastExcelFolder { get; set; } = $@"C:\MacGregor_CAS_WF\Designs\90 Users\{Environment.UserName}";
 
         /// <summary>Bộ môn thiết kế được lựa chọn gần nhất ở combobox</summary>
         public string LastSelectedDisciplineTag { get; set; } = "Temp Checklist - LayoutInterface.xlsx";

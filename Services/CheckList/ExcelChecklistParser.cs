@@ -137,8 +137,9 @@ namespace MCGCadPlugin.Services.CheckList
                 {
                     if (stream == null) return false;
                     
-                    string directory = Path.GetDirectoryName(targetPath);
-                    if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+                    // Đảm bảo thư mục cha tồn tại trước khi ghi file để tránh lỗi DirectoryNotFoundException
+                    string folder = Path.GetDirectoryName(targetPath);
+                    if (!string.IsNullOrEmpty(folder) && !Directory.Exists(folder)) Directory.CreateDirectory(folder);
 
                     using (FileStream fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
                     {
