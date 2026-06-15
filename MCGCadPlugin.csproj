@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
     <RootNamespace>MCGCadPlugin</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <MSBuildWarningsAsMessages>MSB3061</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -28,6 +29,11 @@
     <VaultPath Condition="'$(VaultPath)' == '' and Exists('C:\Program Files\Autodesk\Vault Client 2024\Explorer')">C:\Program Files\Autodesk\Vault Client 2024\Explorer</VaultPath>
     <VaultPath Condition="'$(VaultPath)' == ''">C:\Program Files\Autodesk\Vault Professional 2023\Explorer</VaultPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\**\*.xlsx" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="acdbmgd">
       <HintPath>C:\Program Files\Autodesk\AutoCAD 2023\acdbmgd.dll</HintPath>

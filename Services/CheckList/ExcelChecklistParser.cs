@@ -5,6 +5,7 @@ using System.IO;
 using ExcelDataReader;
 using System.Reflection;
 using MCGCadPlugin.Models.CheckList;
+using MCGCadPlugin.Utilities;
 
 namespace MCGCadPlugin.Services.CheckList
 {
@@ -135,7 +136,19 @@ namespace MCGCadPlugin.Services.CheckList
 
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                 {
-                    if (stream == null) return false;
+                    if (stream == null)
+                    {
+                        // Lấy danh sách các tài nguyên thực tế để chẩn đoán lỗi (Debug/Trace)
+                        var resourceNames = assembly.GetManifestResourceNames();
+                        string availableResources = string.Join(", ", resourceNames);
+                        
+                        string errorMsg = $"Embedded Resource '{resourceName}' not found. " +
+                                          $"Check if Build Action is 'Embedded Resource'. Available: [{availableResources}]";
+                        
+                        Debug.WriteLine($"{LOG_PREFIX} ERROR: {errorMsg}");
+                        FileLogger.LogException(LOG_PREFIX, errorMsg, new Exception("ManifestResourceStream is null"));
+                        return false;
+                    }
                     
                     // Đảm bảo thư mục cha tồn tại trước khi ghi file để tránh lỗi DirectoryNotFoundException
                     string folder = Path.GetDirectoryName(targetPath);
