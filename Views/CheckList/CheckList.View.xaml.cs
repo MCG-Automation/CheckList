@@ -13,6 +13,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using MCGCadPlugin.Models.CheckList;
 using MCGCadPlugin.Services.CheckList;
+using MCGCadPlugin.Utilities;
 
 namespace MCGCadPlugin.Views.CheckList
 {
@@ -25,7 +26,6 @@ namespace MCGCadPlugin.Views.CheckList
         #region Fields
         private const string LOG_PREFIX = "[QaChecklistView]";
         private const string PLACEHOLDER_TEXT = "Enter custom item content here...";
-        private const string DEFAULT_EXCEL_DIR = @"C:\MacGregor_CAS_WF\Designs\90 Users\truonph";
 
         private readonly IChecklistOrchestrator _orchestrator;
         private readonly SettingsRepository _settingsRepo;
@@ -115,6 +115,10 @@ namespace MCGCadPlugin.Views.CheckList
             InitializeComponent();
             DataContext = this;
 
+            // Đảm bảo hỗ trợ bảng mã cho ExcelDataReader (Sửa lỗi "No encoding found")
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            Debug.WriteLine($"{LOG_PREFIX} Đã đăng ký CodePages Encoding Provider.");
+
             // Khởi tạo các dịch vụ phụ thuộc thủ công (DI thủ công tại entry point)
             var excelParser = new ExcelChecklistParser();
             var cacheRepo = new JsonChecklistRepository();
@@ -191,10 +195,11 @@ namespace MCGCadPlugin.Views.CheckList
             };
 
             // Thiết lập thư mục khởi đầu mặc định theo yêu cầu người dùng (nếu tồn tại)
-            if (Directory.Exists(DEFAULT_EXCEL_DIR))
+            string defaultDir = ChecklistAppDataPaths.GetDefaultDesignPath();
+            if (Directory.Exists(defaultDir))
             {
-                openFileDialog.InitialDirectory = DEFAULT_EXCEL_DIR;
-                Debug.WriteLine($"{LOG_PREFIX} Đã thiết lập đường dẫn mặc định khởi tạo: {DEFAULT_EXCEL_DIR}");
+                openFileDialog.InitialDirectory = defaultDir;
+                Debug.WriteLine($"{LOG_PREFIX} Đã thiết lập đường dẫn mặc định khởi tạo: {defaultDir}");
             }
 
             if (openFileDialog.ShowDialog() == true)
@@ -253,7 +258,10 @@ namespace MCGCadPlugin.Views.CheckList
             catch (Exception ex)
             {
                 Debug.WriteLine($"{LOG_PREFIX} LỖI nghiêm trọng khi nạp Excel Async: {ex.Message}");
-                MessageBox.Show($"Error parsing or syncing Excel file data:\n{ex.Message}", "System Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                FileLogger.LogException(LOG_PREFIX, "LoadChecklistFileAsync failed", ex);
+                
+                string detailedError = ex.InnerException != null ? $"{ex.Message}\nDetails: {ex.InnerException.Message}" : ex.Message;
+                MessageBox.Show($"Error parsing or syncing Excel file data:\n\n{detailedError}", "System Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

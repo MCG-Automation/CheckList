@@ -99,8 +99,9 @@ namespace MCGCadPlugin.Services.CheckList
             catch (Exception ex)
             {
                 // CHUẨN HÓA KIẾN TRÚC: Ghi nhận lỗi minh bạch vào hệ thống File Log để debug theo Cách 1 công ty
-                Debug.WriteLine($"{LOG_PREFIX} WARNING: Vault synchronization failed: {ex.Message}");
-                FileLogger.LogException(LOG_PREFIX, "SyncExcelFile từ Vault Server thất bại", ex);
+                string errorDetail = $"SyncExcelFile failed for '{fileName}': {ex.Message}";
+                Debug.WriteLine($"{LOG_PREFIX} WARNING: {errorDetail}");
+                FileLogger.LogException(LOG_PREFIX, errorDetail, ex);
 
                 // Tự động trả về vùng đệm ngoại tuyến để không làm sập ứng dụng của kỹ sư
                 return GetFallbackLocalPath(fileName, settings);
@@ -132,9 +133,7 @@ namespace MCGCadPlugin.Services.CheckList
 
         private string GetFallbackLocalPath(string fileName, ChecklistSettings settings)
         {
-            string fallbackFolder = settings != null && !string.IsNullOrEmpty(settings.LastExcelFolder)
-                ? settings.LastExcelFolder
-                : @"C:\MacGregor_CAS_WF\Designs\90 Users\truonph";
+            string fallbackFolder = ChecklistAppDataPaths.GetDefaultDesignPath();
 
             if (!Directory.Exists(fallbackFolder))
             {

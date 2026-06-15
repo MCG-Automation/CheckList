@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using ExcelDataReader;
+using System.Reflection;
 using MCGCadPlugin.Models.CheckList;
 
 namespace MCGCadPlugin.Services.CheckList
@@ -33,8 +34,14 @@ namespace MCGCadPlugin.Services.CheckList
 
             if (!File.Exists(filePath))
             {
-                Debug.WriteLine($"{LOG_PREFIX} LỖI: Không tìm thấy tệp tại đường dẫn: {filePath}");
-                throw new FileNotFoundException("Không tìm thấy tệp Excel Checklist", filePath);
+                Debug.WriteLine($"{LOG_PREFIX} CẢNH BÁO: Không tìm thấy tệp. Đang giải nén template mặc định...");
+                bool extracted = ExtractDefaultTemplate(filePath);
+                
+                if (!extracted)
+                {
+                    Debug.WriteLine($"{LOG_PREFIX} LỖI: Không thể giải nén template mặc định.");
+                    throw new FileNotFoundException("Checklist template not found and fallback extraction failed.", filePath);
+                }
             }
 
             var document = new ChecklistDocument();
@@ -115,6 +122,34 @@ namespace MCGCadPlugin.Services.CheckList
         #endregion
 
         #region Helpers
+        /// <summary>
+        /// Giải nén file Excel template từ Embedded Resource của Assembly
+        /// </summary>
+        private bool ExtractDefaultTemplate(string targetPath)
+        {
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                // Lưu ý: Đảm bảo file .xlsx đã được set Build Action là 'Embedded Resource'
+                string resourceName = "MCGCadPlugin.Resources.DefaultChecklist.xlsx";
+
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null) return false;
+                    
+                    string directory = Path.GetDirectoryName(targetPath);
+                    if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+
+                    using (FileStream fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
+                    {
+                        stream.CopyTo(fileStream);
+                    }
+                }
+                return true;
+            }
+            catch { return false; }
+        }
+
         /// <summary>
         /// Trích xuất chuỗi ký tự đứng sau tiền tố tiêu đề
         /// </summary>

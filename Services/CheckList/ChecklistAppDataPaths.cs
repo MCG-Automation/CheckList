@@ -22,6 +22,19 @@ namespace MCGCadPlugin.Services.CheckList
             }
         }
 
+        /// <summary>
+        /// Trả về đường dẫn làm việc mặc định trên server CAS (không hardcode user)
+        /// </summary>
+        public static string GetDefaultDesignPath()
+        {
+            string baseDir = @"C:\MacGregor_CAS_WF\Designs\90 Users";
+            string userDir = Environment.UserName;
+            string fullPath = Path.Combine(baseDir, userDir);
+            
+            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
+            return fullPath;
+        }
+
         public static string SettingsFile => Path.Combine(Root, "settings.json");
 
         public static string ChecklistsFolder => Path.Combine(Root, "Checklists");
