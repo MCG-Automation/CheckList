@@ -16,8 +16,9 @@
     <AssemblyName>MCGCadPlugin_$(BuildTimestamp)</AssemblyName>
   </PropertyGroup>
 
+  <!-- Release: MCG_ prefix theo chuẩn MCGVN Installation Guide (DLL phải tên MCG_*.dll) -->
   <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
-    <AssemblyName>MCGCadPlugin</AssemblyName>
+    <AssemblyName>MCG_CadPlugin</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -67,21 +68,46 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-  <!-- Tự động deploy DLL vào bundle sau mỗi lần build -->
+  <!-- Deploy DLL + sinh PackageContents.xml theo chuẩn MCGVN sau mỗi lần build -->
   <Target Name="DeployToBundle" AfterTargets="Build">
     <PropertyGroup>
-      <BundleContents>$(PROGRAMDATA)\Autodesk\ApplicationPlugins\MCGCadPlugin.bundle\Contents</BundleContents>
+      <BundleRoot>$(PROGRAMDATA)\Autodesk\ApplicationPlugins\MCG_CadPlugin.bundle</BundleRoot>
+      <BundleContents>$(BundleRoot)\Contents</BundleContents>
     </PropertyGroup>
-    <!-- Xóa DLL cũ — ContinueOnError khi AutoCAD đang chạy (file bị lock) -->
+
+    <!-- Tạo thư mục bundle nếu chưa có -->
+    <MakeDir Directories="$(BundleContents)" />
+
+    <!-- Xóa DLL cũ (MCGCadPlugin* và MCG_CadPlugin*) — ContinueOnError khi AutoCAD đang chạy -->
     <ItemGroup>
-      <OldDlls Include="$(BundleContents)\MCGCadPlugin*.dll" />
+      <OldDlls Include="$(BundleContents)\MCGCadPlugin*.dll;$(BundleContents)\MCG_CadPlugin*.dll" />
     </ItemGroup>
     <Delete Files="@(OldDlls)" ContinueOnError="true" />
+
     <!-- Copy DLL mới -->
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
-          DestinationFolder="$(BundleContents)"
-          ContinueOnError="true" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(BundleContents)" ContinueOnError="true" />
+
+    <!-- Sinh PackageContents.xml — AutoCAD yêu cầu file này để discover bundle (MCGVN standard) -->
+    <!-- Note: %3F = '?' và %2A = '*' — escape wildcard để MSBuild không glob expand các item này -->
+    <ItemGroup>
+      <PkgXmlLine Include='&lt;%3Fxml version="1.0" encoding="utf-8"%3F&gt;' />
+      <PkgXmlLine Include='&lt;ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Author="MCG Team" Name="MCG_CadPlugin"&gt;' />
+      <PkgXmlLine Include='&lt;Components&gt;' />
+      <PkgXmlLine Include='&lt;RuntimeRequirements OS="Win64" Platform="AutoCAD%2A" SeriesMin="R24.0" /&gt;' />
+      <PkgXmlLine Include='&lt;ComponentEntry AppName="MCG_CadPlugin" Version="1.0.0" ModuleName="./Contents/$(AssemblyName).dll" LoadOnAutoCADStartup="True" /&gt;' />
+      <PkgXmlLine Include='&lt;/Components&gt;' />
+      <PkgXmlLine Include='&lt;/ApplicationPackage&gt;' />
+    </ItemGroup>
+    <WriteLinesToFile File="$(BundleRoot)\PackageContents.xml" Lines="@(PkgXmlLine)" Overwrite="true" />
+
     <Message Text="[Deploy] $(AssemblyName).dll → $(BundleContents)" Importance="High" />
+  </Target>
+
+  <!-- Release: copy thêm vào C:\CustomTools\Autocad (MCGVN source folder cho Install_AutoLoadCadAddin.bat) -->
+  <Target Name="DeployToMCGVNSource" AfterTargets="Build" Condition="'$(Configuration)' != 'Debug'">
+    <MakeDir Directories="C:\CustomTools\Autocad" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="C:\CustomTools\Autocad" ContinueOnError="true" />
+    <Message Text="[MCGVN] $(AssemblyName).dll → C:\CustomTools\Autocad" Importance="High" />
   </Target>
 
   <ItemGroup>
