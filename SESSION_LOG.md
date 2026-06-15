@@ -4,6 +4,69 @@
 
 ---
 
+## Session 2026-06-15 (2) — Fix Vault login: strip http://, fix ExcelParser resource name
+
+### Đã làm
+- [Services/CheckList/VaultSyncService.cs](Services/CheckList/VaultSyncService.cs):
+  - **Fix root cause "Vault offline"**: `settings.VaultServer = "http://VNHPH1-S0006"` → Vault SDK chỉ nhận hostname. Thêm logic strip `http://` / `https://` trước khi gọi `LogIn`.
+  - Bỏ `GetActiveConnections()` (không tồn tại trên Vault 2023 SDK `IVaultConnectionManagerService`).
+  - Log chi tiết `server=` + `vault=` trước khi connect để dễ debug.
+  - `LogInResult.ErrorMessages` được join và ném vào exception message để thấy lý do thất bại.
+  - Wrap `LogOut` trong try-catch để tránh ẩn lỗi từ bước download.
+- [Services/CheckList/ExcelChecklistParser.cs](Services/CheckList/ExcelChecklistParser.cs):
+  - `ExtractDefaultTemplate`: bỏ hardcode `"MCGCadPlugin.Resources.DefaultChecklist.xlsx"`, thay bằng `EndsWith(fileName)` tìm resource khớp tên file thực (per-discipline).
+  - Log danh sách tất cả embedded resources khi không tìm thấy.
+- [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs):
+  - Lỗi `FileNotFoundException` từ parser: hiển thị message rõ ràng với đường dẫn cần copy file + 3 giải pháp.
+- Build: 0 errors.
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- Vault login bây giờ sẽ dùng đúng hostname `VNHPH1-S0006` thay vì `http://VNHPH1-S0006`.
+- Nếu vẫn fail sau fix → xem Debug Output để đọc `LogInResult.ErrorMessages`.
+
+### Bước tiếp theo (BẮT BUỘC — user action)
+- Copy 3 file Excel vào `Resources/` folder để có embedded fallback:
+  - `Temp Checklist - LayoutInterface.xlsx`
+  - `Temp Checklist - Mechanical.xlsx`
+  - `Temp Checklist - Structure.xlsx`
+  - Nguồn: `C:\MacGregor_CAS_WF\Designs\90 Users\truonph\`
+  - Sau khi copy: `dotnet build -c Debug` để embed vào DLL.
+
+### Ghi chú API
+- **Vault SDK `LogIn` server format**: hostname thuần (`VNHPH1-S0006`), không có `http://`. URL prefix khiến login fail âm thầm.
+- **`IVaultConnectionManagerService.GetActiveConnections()`**: không tồn tại trong Vault 2023 SDK — không thể tái dùng connection từ process khác (Vault Explorer).
+- **Embedded resource suffix match**: `assembly.GetManifestResourceNames()` trả tên đầy đủ như `MCGCadPlugin.Resources.Temp Checklist - Structure.xlsx`. Dùng `EndsWith(fileName)` thay vì equals để tránh sai prefix.
+
+---
+
+## Session 2026-06-15 — Vault sync: refactor VaultSyncResult + UI status indicator
+
+### Đã làm
+- [Models/CheckList/VaultSyncResult.cs](Models/CheckList/VaultSyncResult.cs) — TẠO MỚI: model trả về từ VaultSyncService, có `LocalPath`, `SyncedFromVault` (bool), `ErrorMessage`.
+- [Models/CheckList/CheckList.Models.cs](Models/CheckList/CheckList.Models.cs) — Thêm 2 property vào `ChecklistDocument`: `SyncedFromVault` (bool) + `SyncMessage` (string).
+- [Services/CheckList/IVaultSyncService.cs](Services/CheckList/IVaultSyncService.cs) — Đổi return type `string` → `VaultSyncResult`.
+- [Services/CheckList/VaultSyncService.cs](Services/CheckList/VaultSyncService.cs) — Trả `VaultSyncResult` thay vì `string`. Success path: `SyncedFromVault=true`. Fallback path: `SyncedFromVault=false` + `ErrorMessage`.
+- [Services/CheckList/ChecklistOrchestrator.cs](Services/CheckList/ChecklistOrchestrator.cs) — Dùng `VaultSyncResult`, set `newDoc.SyncedFromVault` + `newDoc.SyncMessage` trước khi trả về.
+- [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs) — Thêm properties `SyncStatusText` (string) + `SyncStatusColor` (Brush); set sau khi load xong: "Vault ✔ HH:mm" (xanh) / "Vault offline — local copy" (cam) / "Local file" (xám).
+- [Views/CheckList/CheckList.View.xaml](Views/CheckList/CheckList.View.xaml) — Thêm TextBlock dòng thứ 3 trong StackPanel tiêu đề; Collapsed khi SyncStatusText rỗng.
+- Build: 0 errors, 1 warning Fody (pre-existing).
+
+### Trạng thái
+- **Phase:** 1 — Feature Implementation.
+- **Vault path đã xác nhận đúng:** `$/Designs/90 Users/{username}` ↔ `C:\MacGregor_CAS_WF\Designs\90 Users\{username}` — không cần sửa ChecklistSettings.
+- Flow Get Latest từ Vault đã hoạt động từ trước; session này chỉ thêm feedback UI rõ ràng.
+
+### Bước tiếp theo
+- Test trong AutoCAD: mở Palette → quan sát dòng trạng thái dưới "MacGregor Quality Control". Kỳ vọng: "Vault ✔ 14:32" màu xanh khi online; "Vault offline — local copy" màu cam khi mất kết nối.
+- (Tùy chọn) Bước 2: Thêm Settings dialog để admin thay đổi VaultServer/VaultName/VaultExcelFolderPath không cần sửa settings.json tay.
+
+### Ghi chú
+- `SyncedFromVault` và `SyncMessage` trên `ChecklistDocument` không được serialize vào cache JSON (giá trị tính toán mỗi lần load, không cần lưu lại).
+- Khi `useVault=false` (manual load từ nút "..."), SyncStatusText = "Local file" màu xám — user biết họ đang dùng file chọn tay, không qua Vault.
+
+---
+
 ## Session 2026-05-07 (2) — Update Macgregor_CheckList_UserGuide.html cho khớp hiện trạng
 
 ### Đã làm

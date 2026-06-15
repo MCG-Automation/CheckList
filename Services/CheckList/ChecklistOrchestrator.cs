@@ -46,13 +46,15 @@ namespace MCGCadPlugin.Services.CheckList
             try
             {
                 string targetLocalPath = filePathOrName;
+                VaultSyncResult syncResult = null;
 
                 // 1. Nếu kích hoạt Vault, tiến hành gọi dịch vụ đồng bộ tải phiên bản mới nhất về Working Folder trước
                 if (useVault)
                 {
                     Debug.WriteLine($"{LOG_PREFIX} Yêu cầu đồng bộ qua Vault. Gọi VaultSyncService...");
-                    // filePathOrName lúc này đóng vai trò là tên tệp tin Excel cần đồng bộ (ví dụ: Temp Checklist - Structure.xlsx)
-                    targetLocalPath = _vaultSyncService.SyncExcelFile(filePathOrName, settings);
+                    syncResult = _vaultSyncService.SyncExcelFile(filePathOrName, settings);
+                    targetLocalPath = syncResult.LocalPath;
+                    Debug.WriteLine($"{LOG_PREFIX} Vault sync: SyncedFromVault={syncResult.SyncedFromVault}, Path={targetLocalPath}");
                 }
 
                 // 2. Phân tích tệp Excel tại đường dẫn cục bộ đích để lấy Metadata và danh sách câu hỏi mẫu mới nhất
@@ -81,7 +83,14 @@ namespace MCGCadPlugin.Services.CheckList
                     Debug.WriteLine($"{LOG_PREFIX} Không tìm thấy cache cũ cho Panel '{newDoc.PanelName}'. Sử dụng danh sách Excel làm mặc định.");
                 }
 
-                // 4. Tự động lưu trữ tiến độ lập tức để đồng bộ tệp cứng trên hệ thống đĩa
+                // 4. Ghi trạng thái đồng bộ Vault vào document để tầng View hiển thị cho kỹ sư
+                if (syncResult != null)
+                {
+                    newDoc.SyncedFromVault = syncResult.SyncedFromVault;
+                    newDoc.SyncMessage = syncResult.ErrorMessage;
+                }
+
+                // 5. Tự động lưu trữ tiến độ lập tức để đồng bộ tệp cứng trên hệ thống đĩa
                 _cacheRepository.SaveChecklist(newDoc);
                 Debug.WriteLine($"{LOG_PREFIX} Đã đồng bộ an toàn cache cục bộ cho Checklist: {newDoc.PanelName}");
 

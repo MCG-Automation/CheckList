@@ -85,7 +85,7 @@ namespace MCGCadPlugin.Views.CheckList
         public Brush StatusColor => IsApproved ? Brushes.ForestGreen : Brushes.OrangeRed;
 
         // ================================================================= -->
-        // THÊM MỚI: Các thuộc tính Binding theo dõi luồng bất đồng bộ        -->
+        // Các thuộc tính Binding theo dõi luồng bất đồng bộ & trạng thái Vault -->
         // ================================================================= -->
         private bool _isLoading;
         /// <summary>True khi tệp đang thực hiện đồng bộ Vault ngầm</summary>
@@ -106,6 +106,32 @@ namespace MCGCadPlugin.Views.CheckList
 
         /// <summary>Khóa lưới tương tác chỉnh sửa khi tệp đang tải hoặc đã được duyệt</summary>
         public bool IsGridEnabled => !IsLoading && IsEditable;
+
+        private string _syncStatusText = string.Empty;
+        /// <summary>Dòng trạng thái hiển thị dưới tiêu đề: nguồn gốc file Excel (Vault mới / local cũ)</summary>
+        public string SyncStatusText
+        {
+            get => _syncStatusText;
+            set
+            {
+                if (_syncStatusText == value) return;
+                _syncStatusText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush _syncStatusColor = Brushes.Gray;
+        /// <summary>Màu chữ trạng thái: xanh lá = Vault OK, cam = offline/fallback, xám = local manual</summary>
+        public Brush SyncStatusColor
+        {
+            get => _syncStatusColor;
+            set
+            {
+                if (_syncStatusColor == value) return;
+                _syncStatusColor = value;
+                OnPropertyChanged();
+            }
+        }
         // ================================================================= -->
         #endregion
 
@@ -252,6 +278,29 @@ namespace MCGCadPlugin.Views.CheckList
                     item.PropertyChanged += Item_PropertyChanged;
                 }
 
+                // Cập nhật dòng trạng thái nguồn gốc file Excel cho kỹ sư
+                if (!useVault)
+                {
+                    SyncStatusText = "Local file";
+                    SyncStatusColor = Brushes.Gray;
+                }
+                else if (loadedDoc.SyncedFromVault)
+                {
+                    SyncStatusText = $"Vault  ✔  {DateTime.Now:HH:mm}";
+                    SyncStatusColor = Brushes.ForestGreen;
+                }
+                else
+                {
+                    // Hiển thị lỗi thực tế từ Vault để dễ chẩn đoán
+                    string syncErr = loadedDoc.SyncMessage ?? "unknown error";
+                    // Rút gọn nếu quá dài (chỉ lấy phần trước dấu chấm đầu tiên hoặc 80 ký tự)
+                    int dotIdx = syncErr.IndexOf('.');
+                    string shortErr = dotIdx > 0 && dotIdx < 80 ? syncErr.Substring(0, dotIdx) : syncErr.Length > 80 ? syncErr.Substring(0, 80) + "…" : syncErr;
+                    SyncStatusText = $"Vault offline — {shortErr}";
+                    SyncStatusColor = Brushes.OrangeRed;
+                    Debug.WriteLine($"{LOG_PREFIX} Vault sync error detail: {syncErr}");
+                }
+
                 UpdateProgress();
                 Debug.WriteLine($"{LOG_PREFIX} Load Checklist success: Project {Document.ProjectNo}, Panel {Document.PanelName}");
             }
@@ -259,9 +308,27 @@ namespace MCGCadPlugin.Views.CheckList
             {
                 Debug.WriteLine($"{LOG_PREFIX} LỖI nghiêm trọng khi nạp Excel Async: {ex.Message}");
                 FileLogger.LogException(LOG_PREFIX, "LoadChecklistFileAsync failed", ex);
-                
-                string detailedError = ex.InnerException != null ? $"{ex.Message}\nDetails: {ex.InnerException.Message}" : ex.Message;
-                MessageBox.Show($"Error parsing or syncing Excel file data:\n\n{detailedError}", "System Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                var settings = _settingsRepo.Load();
+                string userMsg;
+                if (ex is FileNotFoundException || ex.Message.Contains("not found") || ex.Message.Contains("fallback extraction failed"))
+                {
+                    userMsg = $"Cannot load Excel checklist template: {filePathOrName}\n\n" +
+                              $"The file was not found locally and no embedded fallback exists.\n\n" +
+                              $"Solutions:\n" +
+                              $"1. Connect to Vault (auto-sync on next open)\n" +
+                              $"2. Manually copy the Excel file to:\n   {settings.LastExcelFolder}\n" +
+                              $"3. (Dev) Add the Excel file to the project Resources/ folder and rebuild";
+                }
+                else
+                {
+                    string inner = ex.InnerException != null ? $"\nDetails: {ex.InnerException.Message}" : string.Empty;
+                    userMsg = $"Error loading Excel checklist:\n\n{ex.Message}{inner}";
+                }
+
+                SyncStatusText = "Load failed";
+                SyncStatusColor = Brushes.OrangeRed;
+                MessageBox.Show(userMsg, "Checklist Load Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             finally
             {

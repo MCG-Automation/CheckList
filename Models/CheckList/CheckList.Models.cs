@@ -128,6 +128,12 @@ namespace MCGCadPlugin.Models.CheckList
         // ================================================================= -->
         public string ProjectNo { get; set; }  // Mã số dự án (ví dụ: 4111736)
         public string PanelName { get; set; }  // Mã phân đoạn/cấu kiện (ví dụ: 4D-01C)
+
+        /// <summary>True nếu danh sách câu hỏi vừa được Get Latest từ Vault thành công</summary>
+        public bool SyncedFromVault { get; set; }
+
+        /// <summary>Thông báo lỗi ngắn khi SyncedFromVault = false; null khi đồng bộ thành công</summary>
+        public string SyncMessage { get; set; }
         // ================================================================= -->
 
         public List<ChecklistItem> Items { get; set; } // Danh sách các câu hỏi

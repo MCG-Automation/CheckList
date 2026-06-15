@@ -40,8 +40,23 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel>
-                    <TextBlock Text="QA/QC CHECKLIST" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" FontSize="14" FontWeight="Bold"/>
+                    <TextBlock Text="MCG CHECKLIST" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" FontSize="14" FontWeight="Bold"/>
                     <TextBlock Text="MacGregor Quality Control" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}" FontSize="10" Margin="0,2,0,0"/>
+                    <!-- Dòng trạng thái Vault: ẩn khi chưa load (SyncStatusText rỗng), hover để xem lỗi đầy đủ -->
+                    <TextBlock Text="{Binding SyncStatusText}" Foreground="{Binding SyncStatusColor}"
+                               FontSize="9" Margin="0,3,0,0" Cursor="Help"
+                               ToolTip="{Binding Document.SyncMessage}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SyncStatusText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
 
                 <!-- Dropdown chọn loại bản vẽ mẫu (Khóa khi đang đồng bộ) -->

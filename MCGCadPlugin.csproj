@@ -62,7 +62,28 @@
       <HintPath>$(VaultPath)\Autodesk.DataManagement.Client.Framework.Vault.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Autodesk.DataManagement.Client.Framework.Vault.Forms">
+      <HintPath>$(VaultPath)\Autodesk.DataManagement.Client.Framework.Vault.Forms.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
+  <!-- Tự động deploy DLL vào bundle sau mỗi lần build -->
+  <Target Name="DeployToBundle" AfterTargets="Build">
+    <PropertyGroup>
+      <BundleContents>$(PROGRAMDATA)\Autodesk\ApplicationPlugins\MCGCadPlugin.bundle\Contents</BundleContents>
+    </PropertyGroup>
+    <!-- Xóa DLL cũ — ContinueOnError khi AutoCAD đang chạy (file bị lock) -->
+    <ItemGroup>
+      <OldDlls Include="$(BundleContents)\MCGCadPlugin*.dll" />
+    </ItemGroup>
+    <Delete Files="@(OldDlls)" ContinueOnError="true" />
+    <!-- Copy DLL mới -->
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll"
+          DestinationFolder="$(BundleContents)"
+          ContinueOnError="true" />
+    <Message Text="[Deploy] $(AssemblyName).dll → $(BundleContents)" Importance="High" />
+  </Target>
+
   <ItemGroup>
     <PackageReference Include="Fody" Version="6.6.4">
       <PrivateAssets>all</PrivateAssets>

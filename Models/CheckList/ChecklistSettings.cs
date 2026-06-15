@@ -9,7 +9,7 @@ namespace MCGCadPlugin.Models.CheckList
     public class ChecklistSettings
     {
         /// <summary>Địa chỉ máy chủ Autodesk Vault Server nội bộ</summary>
-        public string VaultServer { get; set; } = "http://VNHPH1-S0006";
+        public string VaultServer { get; set; } = "VNHPH1-S0006";
 
         /// <summary>Tên cơ sở dữ liệu kho lưu trữ Vault hiện hành</summary>
         public string VaultName { get; set; } = "MacGregor_CAS";

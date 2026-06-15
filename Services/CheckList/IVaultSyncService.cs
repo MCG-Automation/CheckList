@@ -12,7 +12,10 @@ namespace MCGCadPlugin.Services.CheckList
         /// </summary>
         /// <param name="fileName">Tên tệp Excel cần tải (ví dụ: Temp Checklist - Structure.xlsx)</param>
         /// <param name="settings">Cấu hình cài đặt Vault hiện hành</param>
-        /// <returns>Đường dẫn tệp tin cục bộ (Local Working Path) sẵn sàng để đọc, hoặc đường dẫn dự phòng nếu lỗi</returns>
-        string SyncExcelFile(string fileName, ChecklistSettings settings);
+        /// <returns>
+        /// VaultSyncResult với LocalPath sẵn sàng để đọc.
+        /// SyncedFromVault = true khi Get Latest thành công; false khi dùng bản local dự phòng.
+        /// </returns>
+        VaultSyncResult SyncExcelFile(string fileName, ChecklistSettings settings);
     }
 }

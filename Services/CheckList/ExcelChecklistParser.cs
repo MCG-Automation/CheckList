@@ -124,44 +124,63 @@ namespace MCGCadPlugin.Services.CheckList
 
         #region Helpers
         /// <summary>
-        /// Giải nén file Excel template từ Embedded Resource của Assembly
+        /// Giải nén file Excel template từ Embedded Resource của Assembly.
+        /// Tìm resource theo suffix tên file (không hardcode namespace) để tương thích mọi phiên bản MSBuild.
         /// </summary>
         private bool ExtractDefaultTemplate(string targetPath)
         {
             try
             {
+                string fileName = Path.GetFileName(targetPath);
                 var assembly = Assembly.GetExecutingAssembly();
-                // Lưu ý: Đảm bảo file .xlsx đã được set Build Action là 'Embedded Resource'
-                string resourceName = "MCGCadPlugin.Resources.DefaultChecklist.xlsx";
+                string[] allResources = assembly.GetManifestResourceNames();
+
+                // Tìm resource khớp với tên file — dùng EndsWith thay vì Equals để tránh sai prefix namespace
+                string resourceName = null;
+                foreach (string name in allResources)
+                {
+                    if (name.EndsWith(fileName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        resourceName = name;
+                        break;
+                    }
+                }
+
+                if (resourceName == null)
+                {
+                    string available = allResources.Length > 0
+                        ? string.Join(", ", allResources)
+                        : "(none — no .xlsx in Resources/ folder)";
+                    string errorMsg = $"No embedded resource found matching '{fileName}'. " +
+                                      $"Copy the Excel template to the project's Resources/ folder and rebuild. Available: [{available}]";
+                    Debug.WriteLine($"{LOG_PREFIX} ERROR: {errorMsg}");
+                    FileLogger.LogException(LOG_PREFIX, errorMsg, new Exception("ManifestResourceStream is null"));
+                    return false;
+                }
 
                 using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                 {
-                    if (stream == null)
-                    {
-                        // Lấy danh sách các tài nguyên thực tế để chẩn đoán lỗi (Debug/Trace)
-                        var resourceNames = assembly.GetManifestResourceNames();
-                        string availableResources = string.Join(", ", resourceNames);
-                        
-                        string errorMsg = $"Embedded Resource '{resourceName}' not found. " +
-                                          $"Check if Build Action is 'Embedded Resource'. Available: [{availableResources}]";
-                        
-                        Debug.WriteLine($"{LOG_PREFIX} ERROR: {errorMsg}");
-                        FileLogger.LogException(LOG_PREFIX, errorMsg, new Exception("ManifestResourceStream is null"));
-                        return false;
-                    }
-                    
-                    // Đảm bảo thư mục cha tồn tại trước khi ghi file để tránh lỗi DirectoryNotFoundException
+                    if (stream == null) return false;
+
+                    // Đảm bảo thư mục cha tồn tại trước khi ghi file
                     string folder = Path.GetDirectoryName(targetPath);
-                    if (!string.IsNullOrEmpty(folder) && !Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                    if (!string.IsNullOrEmpty(folder) && !Directory.Exists(folder))
+                        Directory.CreateDirectory(folder);
 
                     using (FileStream fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write))
                     {
                         stream.CopyTo(fileStream);
                     }
                 }
+
+                Debug.WriteLine($"{LOG_PREFIX} Extracted embedded resource '{resourceName}' → {targetPath}");
                 return true;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{LOG_PREFIX} ExtractDefaultTemplate FAILED: {ex.Message}");
+                return false;
+            }
         }
 
         /// <summary>
