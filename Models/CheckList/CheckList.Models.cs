@@ -129,6 +129,9 @@ namespace MCGCadPlugin.Models.CheckList
         public string ProjectNo { get; set; }  // Mã số dự án (ví dụ: 4111736)
         public string PanelName { get; set; }  // Mã phân đoạn/cấu kiện (ví dụ: 4D-01C)
 
+        /// <summary>Tên file Excel đã dùng để nạp — dùng để khôi phục đúng loại checklist khi mở lại bản vẽ</summary>
+        public string ExcelFileName { get; set; }
+
         /// <summary>True nếu danh sách câu hỏi vừa được Get Latest từ Vault thành công</summary>
         public bool SyncedFromVault { get; set; }
 

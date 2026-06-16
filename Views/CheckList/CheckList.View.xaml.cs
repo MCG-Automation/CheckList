@@ -28,11 +28,15 @@ namespace MCGCadPlugin.Views.CheckList
         private const string PLACEHOLDER_TEXT = "Enter custom item content here...";
 
         private readonly IChecklistOrchestrator _orchestrator;
+        private readonly IAutoCadChecklistService _autocadService;
         private readonly SettingsRepository _settingsRepo;
         private ChecklistDocument _document;
         private ObservableCollection<ChecklistItem> _checklistItems;
 
         private readonly DispatcherTimer _debounceSaveTimer;
+
+        // Ngăn CboDiscipline_SelectionChanged kích hoạt load khi chương trình tự chọn (không phải user)
+        private bool _suppressSelectionChanged;
         #endregion
 
         #region Properties
@@ -150,6 +154,7 @@ namespace MCGCadPlugin.Views.CheckList
             var cacheRepo = new JsonChecklistRepository();
             var vaultSync = new VaultSyncService();
             _orchestrator = new ChecklistOrchestrator(excelParser, cacheRepo, vaultSync);
+            _autocadService = new AutoCadService();
             _settingsRepo = new SettingsRepository();
 
             // Cấu hình Timer cho chức năng Auto-save Debounce 500ms
@@ -171,20 +176,45 @@ namespace MCGCadPlugin.Views.CheckList
 
         #region Method: Trigger Initial Selection
         /// <summary>
-        /// Kích hoạt nạp tệp Excel tương ứng cho bộ môn được chọn làm mặc định khi mở Palette
+        /// Khôi phục checklist từ bản vẽ DWG nếu bản vẽ đã có dữ liệu từ phiên trước.
+        /// Nếu bản vẽ mới (chưa có data): không load gì cả, chờ user chọn loại bản vẽ.
         /// </summary>
         private async void TriggerInitialSelection()
         {
             if (_orchestrator == null) return;
 
-            if (CboDiscipline.SelectedItem is ComboBoxItem selectedItem)
+            // Đọc DWG để kiểm tra bản vẽ này đã từng dùng checklist loại nào chưa
+            ChecklistDocument dwgDoc = null;
+            try { dwgDoc = _autocadService.LoadChecklistFromDwg(); }
+            catch (Exception ex) { Debug.WriteLine($"{LOG_PREFIX} TriggerInitialSelection: không đọc được DWG: {ex.Message}"); }
+
+            if (dwgDoc?.ExcelFileName == null)
             {
-                string fileName = selectedItem.Tag as string;
-                if (!string.IsNullOrEmpty(fileName))
+                // Bản vẽ mới hoặc chưa có checklist — chờ user chọn từ dropdown
+                Debug.WriteLine($"{LOG_PREFIX} Bản vẽ chưa có Checklist. Chờ user chọn loại bản vẽ.");
+                return;
+            }
+
+            // Bản vẽ đã có dữ liệu — tìm ComboBoxItem khớp với tên file đã lưu
+            Debug.WriteLine($"{LOG_PREFIX} Phát hiện DWG có Checklist ({dwgDoc.ExcelFileName}). Tự động khôi phục...");
+
+            ComboBoxItem matchedItem = null;
+            foreach (ComboBoxItem item in CboDiscipline.Items)
+            {
+                if (string.Equals(item.Tag as string, dwgDoc.ExcelFileName, StringComparison.OrdinalIgnoreCase))
                 {
-                    await LoadChecklistFileAsync(fileName, useVault: true);
+                    matchedItem = item;
+                    break;
                 }
             }
+
+            // Chọn ComboBox mà không kích hoạt SelectionChanged (tránh load 2 lần)
+            _suppressSelectionChanged = true;
+            CboDiscipline.SelectedItem = matchedItem; // null nếu file thủ công, không sao
+            _suppressSelectionChanged = false;
+
+            // Load checklist — DWG data sẽ được dùng tự động qua carry-over trong orchestrator
+            await LoadChecklistFileAsync(dwgDoc.ExcelFileName, useVault: true);
         }
         #endregion
 
@@ -194,7 +224,7 @@ namespace MCGCadPlugin.Views.CheckList
         /// </summary>
         private async void CboDiscipline_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_orchestrator == null) return;
+            if (_suppressSelectionChanged || _orchestrator == null) return;
 
             if (CboDiscipline.SelectedItem is ComboBoxItem selectedItem)
             {
@@ -259,16 +289,32 @@ namespace MCGCadPlugin.Views.CheckList
 
                 ChecklistItems = null;
 
-                // 1. Thực thi đồng bộ Vault Server và phân tích Excel hoàn toàn trên luồng chạy ngầm Task.Run
+                // 1. Đọc dữ liệu DWG trên luồng UI trước (AutoCAD API yêu cầu gọi từ luồng chính)
+                ChecklistDocument dwgDoc = null;
+                try
+                {
+                    dwgDoc = _autocadService.LoadChecklistFromDwg();
+                    Debug.WriteLine(dwgDoc != null
+                        ? $"{LOG_PREFIX} Đọc thành công dữ liệu Checklist từ bản vẽ DWG."
+                        : $"{LOG_PREFIX} Bản vẽ chưa có dữ liệu Checklist, sẽ dùng JSON cache hoặc Excel mặc định.");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"{LOG_PREFIX} Không thể đọc DWG (bỏ qua, fallback về JSON): {ex.Message}");
+                }
+
+                // 2. Thực thi đồng bộ Vault Server và phân tích Excel hoàn toàn trên luồng chạy ngầm Task.Run
                 var settings = _settingsRepo.Load();
-                ChecklistDocument loadedDoc = await Task.Run(() => 
-                    _orchestrator.OpenChecklist(filePathOrName, settings, useVault)
+                ChecklistDocument loadedDoc = await Task.Run(() =>
+                    _orchestrator.OpenChecklist(filePathOrName, settings, useVault, dwgDoc)
                 );
 
                 // Trả focus về bản vẽ AutoCAD sau khi tác vụ ngầm hoàn thành
                 Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
 
                 // 2. Cập nhật lại các liên kết WPF trên luồng UI chính
+                // Ghi nhớ tên file Excel đã dùng để khôi phục đúng loại checklist khi mở lại bản vẽ
+                loadedDoc.ExcelFileName = filePathOrName;
                 Document = loadedDoc;
                 ChecklistItems = new ObservableCollection<ChecklistItem>(loadedDoc.Items);
 
@@ -388,6 +434,7 @@ namespace MCGCadPlugin.Views.CheckList
                 Debug.WriteLine($"{LOG_PREFIX} Tự động lưu cache (Auto-save) sau 500ms tĩnh lặng.");
                 Document.Items = ChecklistItems.ToList();
                 _orchestrator.SaveProgress(Document);
+                SaveToDwgSilent();
             }
         }
         #endregion
@@ -477,10 +524,11 @@ namespace MCGCadPlugin.Views.CheckList
             OnPropertyChanged(nameof(IsGridEnabled));
             OnPropertyChanged(nameof(StatusColor));
 
-            // Lưu lập tức bộ đệm
+            // Lưu lập tức bộ đệm (JSON + DWG)
             _debounceSaveTimer.Stop();
             Document.Items = ChecklistItems.ToList();
             _orchestrator.SaveProgress(Document);
+            SaveToDwgSilent();
 
             Debug.WriteLine($"{LOG_PREFIX} Ký duyệt phê duyệt THÀNH CÔNG bởi: {Document.ApprovedBy}");
         }
@@ -503,12 +551,33 @@ namespace MCGCadPlugin.Views.CheckList
 
             _debounceSaveTimer.Stop();
             _orchestrator.SaveProgress(Document);
+            SaveToDwgSilent();
 
             Debug.WriteLine($"{LOG_PREFIX} Khôi phục hồ sơ về trạng thái PENDING.");
         }
         #endregion
 
         #region Helpers
+        /// <summary>
+        /// Lưu dữ liệu Checklist vào bản vẽ DWG một cách im lặng (không throw ngoại lệ ra UI).
+        /// Lỗi được ghi log để debug nhưng không cản trở luồng làm việc.
+        /// </summary>
+        private void SaveToDwgSilent()
+        {
+            if (Document == null) return;
+            try
+            {
+                bool ok = _autocadService.SaveChecklistToDwg(Document);
+                Debug.WriteLine(ok
+                    ? $"{LOG_PREFIX} Đã ghi Checklist vào bản vẽ DWG thành công."
+                    : $"{LOG_PREFIX} SaveChecklistToDwg trả về false (không có bản vẽ đang mở?).");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{LOG_PREFIX} Lỗi khi ghi DWG (bỏ qua, JSON đã được lưu): {ex.Message}");
+            }
+        }
+
         /// <summary>
         /// Tính toán phần trăm tiến độ checklist
         /// </summary>

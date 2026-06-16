@@ -14,8 +14,9 @@ namespace MCGCadPlugin.Services.CheckList
         /// <param name="filePathOrName">Đường dẫn tệp cục bộ hoặc tên tệp tin ảo trong Vault</param>
         /// <param name="settings">Cấu hình kết nối Vault và đường dẫn hiện hành</param>
         /// <param name="useVault">True nếu muốn kích hoạt đồng bộ hóa tự động từ Vault Server trước khi nạp</param>
+        /// <param name="dwgPreload">Dữ liệu đọc sẵn từ bản vẽ DWG — nếu có, được ưu tiên hơn JSON cache</param>
         /// <returns>Đối tượng ChecklistDocument chứa dữ liệu bóc tách đã gộp tiến độ</returns>
-        ChecklistDocument OpenChecklist(string filePathOrName, ChecklistSettings settings, bool useVault);
+        ChecklistDocument OpenChecklist(string filePathOrName, ChecklistSettings settings, bool useVault, ChecklistDocument dwgPreload = null);
 
         /// <summary>
         /// Lưu tiến trình hiện tại của Checklist xuống bộ nhớ cache JSON.

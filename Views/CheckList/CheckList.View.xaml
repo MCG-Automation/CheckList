@@ -72,7 +72,7 @@
                             <Setter Property="Padding" Value="6,4"/>
                         </Style>
                     </ComboBox.Resources>
-                    <ComboBoxItem Content="Layout / Interface" Tag="Temp Checklist - LayoutInterface.xlsx" IsSelected="True"/>
+                    <ComboBoxItem Content="Layout / Interface" Tag="Temp Checklist - LayoutInterface.xlsx"/>
                     <ComboBoxItem Content="Mechanical" Tag="Temp Checklist - Mechanical.xlsx"/>
                     <ComboBoxItem Content="Structure" Tag="Temp Checklist - Structure.xlsx"/>
                 </ComboBox>
@@ -135,8 +135,28 @@
             </ProgressBar>
         </Grid>
 
-        <!-- 2. Lưới danh sách câu hỏi -->
-        <DataGrid Grid.Row="2" ItemsSource="{Binding ChecklistItems}" AutoGenerateColumns="False" 
+        <!-- 2a. Empty state — hiển thị khi chưa chọn loại bản vẽ -->
+        <Border Grid.Row="2" BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" CornerRadius="4">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Document}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20">
+                <TextBlock Text="↑  Select a drawing type above" FontSize="13" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                <TextBlock Text="to load the checklist for this drawing" FontSize="11" Margin="0,6,0,0"
+                           HorizontalAlignment="Center" Foreground="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 2b. Lưới danh sách câu hỏi -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding ChecklistItems}" AutoGenerateColumns="False"
                   CanUserAddRows="False" CanUserDeleteRows="False" GridLinesVisibility="Horizontal"
                   HorizontalGridLinesBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" Background="Transparent" BorderThickness="0"
                   RowHeaderWidth="0" Foreground="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" 

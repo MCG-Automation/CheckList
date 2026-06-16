@@ -4,6 +4,55 @@
 
 ---
 
+## Session 2026-06-16 (2) — Checklist restore theo bản vẽ + bỏ auto-load
+
+### Đã làm
+- [Models/CheckList/CheckList.Models.cs](Models/CheckList/CheckList.Models.cs): Thêm `ExcelFileName` vào `ChecklistDocument` — lưu loại checklist nào đã dùng
+- [Views/CheckList/CheckList.View.xaml](Views/CheckList/CheckList.View.xaml): Bỏ `IsSelected="True"` khỏi ComboBoxItem; thêm empty-state placeholder "Select a drawing type above"
+- [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs):
+  - Thêm `_suppressSelectionChanged` flag
+  - Refactor `TriggerInitialSelection`: đọc DWG → nếu có data thì tự chọn đúng ComboBox item và load; nếu không có thì để trống chờ user
+  - `CboDiscipline_SelectionChanged`: thoát sớm khi `_suppressSelectionChanged = true`
+  - `LoadChecklistFileAsync`: lưu `loadedDoc.ExcelFileName = filePathOrName` sau khi load thành công
+
+### Hành vi sau khi fix
+- Mở tool với bản vẽ mới → hiện empty state "Select a drawing type above"
+- User chọn "Structure" → load checklist Structure, lưu vào DWG
+- Tắt máy, hôm sau mở lại bản vẽ → tool tự động chọn "Structure" và khôi phục toàn bộ dấu tích
+
+### Build: PASS (0 errors, 0 warnings)
+
+---
+
+## Session 2026-06-16 — Wire-up DWG persistence cho CheckList
+
+### Đã làm
+- [Services/CheckList/IAutoCadChecklistService.cs](Services/CheckList/IAutoCadChecklistService.cs): **Tạo mới** — Interface cho DWG read/write service
+- [Services/CheckList/CheckList.Main.cs](Services/CheckList/CheckList.Main.cs): `AutoCadService` implement `IAutoCadChecklistService`
+- [Services/CheckList/IChecklistOrchestrator.cs](Services/CheckList/IChecklistOrchestrator.cs): Thêm `dwgPreload` parameter vào `OpenChecklist`
+- [Services/CheckList/ChecklistOrchestrator.cs](Services/CheckList/ChecklistOrchestrator.cs): Ưu tiên DWG data hơn JSON cache trong Carry-over
+- [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs): Thêm `_autocadService`, load DWG trước Task.Run, save DWG trong debounce timer / Approve / Reopen; thêm `SaveToDwgSilent()` helper
+
+### Trạng thái
+- Phase: CheckList — DWG persistence hoàn chỉnh
+- Build: **PASS** (0 errors, 0 warnings mới)
+
+### Ưu tiên nguồn dữ liệu khi mở bản vẽ
+1. DWG XRecord (portable, đi theo file) → **ưu tiên cao nhất**
+2. JSON cache %APPDATA% (local machine) → fallback nếu DWG chưa có data
+3. Excel template → fallback cuối (fresh start)
+
+### Khi nào lưu vào DWG
+- Auto-save debounce 500ms sau mỗi tick/untick
+- Ngay lập tức khi Approve hoặc Reopen
+- Silent (không block UI nếu lỗi, chỉ log)
+
+### Bước tiếp theo
+- Test: mở bản vẽ, tích 20%, lưu DWG (Ctrl+S), mở lại → verify dữ liệu được khôi phục
+- Test: copy DWG sang máy khác → verify checklist đi theo file
+
+---
+
 ## Session 2026-06-15 (2) — Fix Vault login: strip http://, fix ExcelParser resource name
 
 ### Đã làm

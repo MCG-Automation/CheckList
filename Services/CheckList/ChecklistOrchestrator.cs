@@ -40,9 +40,9 @@ namespace MCGCadPlugin.Services.CheckList
         /// <summary>
         /// Nạp tệp Excel (qua Vault hoặc trực tiếp từ đĩa), thực hiện Carry-over tự động kế thừa tiến độ cũ nếu đã có cache.
         /// </summary>
-        public ChecklistDocument OpenChecklist(string filePathOrName, ChecklistSettings settings, bool useVault)
+        public ChecklistDocument OpenChecklist(string filePathOrName, ChecklistSettings settings, bool useVault, ChecklistDocument dwgPreload = null)
         {
-            Debug.WriteLine($"{LOG_PREFIX} Bắt đầu mở Checklist: {filePathOrName} (UseVault: {useVault})");
+            Debug.WriteLine($"{LOG_PREFIX} Bắt đầu mở Checklist: {filePathOrName} (UseVault: {useVault}, DWG preload: {dwgPreload != null})");
             try
             {
                 string targetLocalPath = filePathOrName;
@@ -62,25 +62,34 @@ namespace MCGCadPlugin.Services.CheckList
                 // nên không cần kiểm tra File.Exists tại đây để tránh ngăn cản logic dự phòng.
                 var newDoc = _excelParser.Parse(targetLocalPath);
 
-                // 3. Thử tải dữ liệu cache cũ từ bộ nhớ JSON dựa trên ProjectNo, PanelName, Discipline
-                var cachedDoc = _cacheRepository.LoadChecklist(newDoc.ProjectNo, newDoc.PanelName, newDoc.Discipline);
-
-                if (cachedDoc != null)
+                // 3. Xác định nguồn cache: DWG được ưu tiên vì đi theo file bản vẽ (portable hơn JSON local)
+                //    Nếu không có DWG preload thì fallback về JSON cache trên máy hiện tại.
+                ChecklistDocument effectiveCache = dwgPreload;
+                if (effectiveCache != null)
                 {
-                    Debug.WriteLine($"{LOG_PREFIX} Phát hiện có cache cũ cho Panel '{newDoc.PanelName}'. Tiến hành gộp dữ liệu Carry-over...");
-                    
-                    // Thực hiện thuật toán gộp trạng thái cũ vào cấu trúc câu hỏi mới
-                    var mergedItems = MergeChecklistItems(newDoc.Items, cachedDoc.Items);
-                    newDoc.Items = mergedItems;
-
-                    // Kế thừa trạng thái phê duyệt (Approval workflow)
-                    newDoc.Status = cachedDoc.Status;
-                    newDoc.ApprovedBy = cachedDoc.ApprovedBy;
-                    newDoc.ApprovedDate = cachedDoc.ApprovedDate;
+                    Debug.WriteLine($"{LOG_PREFIX} Sử dụng dữ liệu DWG làm nguồn Carry-over cho Panel '{newDoc.PanelName}'.");
                 }
                 else
                 {
-                    Debug.WriteLine($"{LOG_PREFIX} Không tìm thấy cache cũ cho Panel '{newDoc.PanelName}'. Sử dụng danh sách Excel làm mặc định.");
+                    effectiveCache = _cacheRepository.LoadChecklist(newDoc.ProjectNo, newDoc.PanelName, newDoc.Discipline);
+                    if (effectiveCache != null)
+                        Debug.WriteLine($"{LOG_PREFIX} Không có DWG cache, dùng JSON cache cho Panel '{newDoc.PanelName}'.");
+                }
+
+                if (effectiveCache != null)
+                {
+                    // Thực hiện thuật toán gộp trạng thái cũ vào cấu trúc câu hỏi mới
+                    var mergedItems = MergeChecklistItems(newDoc.Items, effectiveCache.Items);
+                    newDoc.Items = mergedItems;
+
+                    // Kế thừa trạng thái phê duyệt (Approval workflow)
+                    newDoc.Status = effectiveCache.Status;
+                    newDoc.ApprovedBy = effectiveCache.ApprovedBy;
+                    newDoc.ApprovedDate = effectiveCache.ApprovedDate;
+                }
+                else
+                {
+                    Debug.WriteLine($"{LOG_PREFIX} Không tìm thấy cache nào cho Panel '{newDoc.PanelName}'. Sử dụng danh sách Excel làm mặc định.");
                 }
 
                 // 4. Ghi trạng thái đồng bộ Vault vào document để tầng View hiển thị cho kỹ sư

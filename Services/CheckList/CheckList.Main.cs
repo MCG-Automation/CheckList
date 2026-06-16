@@ -8,7 +8,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace MCGCadPlugin.Services.CheckList
 {
-    public partial class AutoCadService
+    public partial class AutoCadService : IAutoCadChecklistService
     {
         // Tên của Thư mục ẩn và File ẩn bên trong bản vẽ DWG
         private const string QA_DICT_NAME = "MACGREGOR_QA_SYSTEM";
