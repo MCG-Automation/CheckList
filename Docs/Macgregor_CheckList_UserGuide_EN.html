@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MacGregor QA/QC Checklist — User Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:       #0d2045;
+    --navy-mid:   #1a3060;
+    --navy-light: #253d72;
+    --accent:     #c0392b;
+    --gold:       #f0a500;
+    --green:      #16a34a;
+    --white:      #ffffff;
+    --off-white:  #f4f6fb;
+    --text:       #1e2d4a;
+    --muted:      #6b7fa3;
+    --border:     #dce3f0;
+    --code-bg:    #eef2fa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+    color: var(--white);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(192,57,43,0.18) 0%, transparent 65%);
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 32px; background: var(--off-white);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+  .header-inner { max-width: 960px; margin: auto; position: relative; z-index: 1; }
+  .header-badge {
+    display: inline-block;
+    background: rgba(192,57,43,0.85); color: var(--white);
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    padding: 4px 14px; border-radius: 20px; margin-bottom: 18px;
+  }
+  header h1 {
+    font-size: clamp(26px, 4vw, 42px); font-weight: 700; line-height: 1.2; margin-bottom: 10px;
+  }
+  header h1 span { color: var(--gold); }
+  header p.subtitle { font-size: 15px; color: rgba(255,255,255,0.65); max-width: 540px; }
+  .platform-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(192,57,43,0.35); border: 1px solid rgba(255,255,255,0.25);
+    color: var(--white); font-size: 12px; font-weight: 600;
+    padding: 5px 14px; border-radius: 20px; margin-top: 20px;
+  }
+
+  /* ── NAV TABS ── */
+  nav.tabs {
+    background: var(--white);
+    box-shadow: 0 2px 12px rgba(13,32,69,0.08);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .tabs-inner {
+    max-width: 960px; margin: auto;
+    display: flex; gap: 4px; padding: 0 24px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs-inner::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none;
+    padding: 16px 18px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--muted); cursor: pointer; white-space: nowrap;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  .tab-btn:hover { color: var(--navy); }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--accent); }
+
+  /* ── MAIN ── */
+  main { max-width: 960px; margin: 40px auto; padding: 0 24px 80px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 28px; font-weight: 700; color: var(--navy);
+    margin-bottom: 32px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--border); position: relative;
+  }
+  .section-title::after {
+    content: ''; position: absolute; bottom: -2px; left: 0;
+    width: 60px; height: 2px; background: var(--accent);
+  }
+
+  /* ── STEP CARDS ── */
+  .steps { display: flex; flex-direction: column; gap: 20px; }
+  .step-card {
+    background: var(--white); border-radius: 16px;
+    padding: 28px 32px; display: flex; gap: 24px; align-items: flex-start;
+    box-shadow: 0 2px 16px rgba(13,32,69,0.07); border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .step-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(13,32,69,0.12); }
+  .step-num {
+    flex-shrink: 0; width: 52px; height: 52px;
+    background: var(--navy); color: var(--white); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700;
+  }
+  .step-num.green { background: var(--green); }
+  .step-num.gold  { background: #d97706; }
+  .step-body h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .step-body p  { font-size: 14px; color: #4a5a78; margin-bottom: 8px; }
+  .step-body ul { padding-left: 20px; margin-top: 6px; }
+  .step-body ul li { font-size: 14px; color: #4a5a78; margin-bottom: 6px; }
+  .step-body ul strong { color: var(--navy); }
+  .step-body ol { padding-left: 20px; margin-top: 8px; }
+  .step-body ol li { font-size: 14px; color: #4a5a78; margin-bottom: 6px; }
+
+  /* ── TAGS ── */
+  .cmd {
+    display: inline-block; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+    color: var(--navy); background: var(--code-bg); border: 1px solid #c9d4ea;
+    border-radius: 6px; padding: 3px 9px;
+  }
+  .path {
+    display: inline-block; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+    color: var(--accent); background: #fdf0ef; border: 1px solid #f5c6c2;
+    border-radius: 6px; padding: 3px 9px;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .note-box {
+    background: #fffbea; border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0; padding: 13px 17px; margin: 14px 0;
+    font-size: 13.5px; color: #5a4400;
+  }
+  .success-box {
+    background: #f0fdf4; border-left: 4px solid var(--green);
+    border-radius: 0 8px 8px 0; padding: 13px 17px; margin: 14px 0;
+    font-size: 13.5px; color: #14532d;
+  }
+  .danger-box {
+    background: #fef2f2; border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0; padding: 13px 17px; margin: 14px 0;
+    font-size: 13.5px; color: #7f1d1d;
+  }
+
+  /* ── WHITE CARD ── */
+  .white-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px 32px; box-shadow: 0 2px 16px rgba(13,32,69,0.07); margin-bottom: 24px;
+  }
+  .white-card h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 14px; }
+  .white-card h4 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .white-card p  { font-size: 14px; color: #4a5a78; margin-bottom: 8px; }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── FEATURE GRID ── */
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
+  .feat-item {
+    background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px; box-shadow: 0 1px 8px rgba(13,32,69,0.05);
+  }
+  .feat-icon { font-size: 24px; margin-bottom: 8px; }
+  .feat-item h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .feat-item p  { font-size: 13px; color: var(--muted); }
+
+  /* ── DATA FLOW ── */
+  .data-flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+  .data-node {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--navy);
+    box-shadow: 0 1px 6px rgba(13,32,69,0.06);
+  }
+  .data-node.primary { border-color: #6eb3fa; background: #eef6ff; }
+  .data-node.green   { border-color: #86efac; background: #f0fdf4; color: var(--green); }
+  .data-arrow { color: var(--muted); font-size: 18px; font-weight: 700; }
+
+  /* ── STATUS BADGES ── */
+  .status-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600;
+  }
+  .status-badge.approved { background: #f0fdf4; border: 1.5px solid #86efac; color: var(--green); }
+  .status-badge.pending  { background: #fff7ed; border: 1.5px solid #fdba74; color: #c2410c; }
+  .status-badge.sync-ok  { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
+  .status-badge.sync-off { background: #fff7ed; border: 1.5px solid #fdba74; color: #9a3412; }
+  .status-badge.sync-loc { background: var(--code-bg); border: 1.5px solid #c9d4ea; color: var(--muted); }
+
+  /* ── FAQ ── */
+  .faq-item { margin-bottom: 16px; }
+  .faq-q {
+    font-size: 14.5px; font-weight: 700; color: var(--navy);
+    padding: 13px 16px; background: var(--code-bg); border-radius: 8px;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--border); user-select: none;
+  }
+  .faq-q:hover { background: #e6ecf8; }
+  .faq-chevron { color: var(--muted); font-size: 12px; flex-shrink: 0; margin-left: 12px; transition: transform 0.2s; }
+  .faq-a {
+    display: none; padding: 14px 18px; font-size: 13.5px; color: #4a5a78;
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 8px 8px; background: var(--white); line-height: 1.75;
+  }
+  .faq-a.open { display: block; }
+  .faq-item.open .faq-chevron { transform: rotate(90deg); }
+  .faq-a ol, .faq-a ul { padding-left: 20px; margin-top: 8px; }
+  .faq-a li { margin-bottom: 6px; }
+
+  /* ── ROADMAP ── */
+  .roadmap-card {
+    background: var(--white); border: 2px dashed #fca5a5;
+    border-radius: 14px; padding: 28px 32px; margin-bottom: 20px;
+  }
+  .roadmap-badge {
+    display: inline-block; background: #fee2e2; color: var(--accent);
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; margin-bottom: 12px;
+  }
+  .roadmap-step {
+    background: var(--off-white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+  }
+  .roadmap-step .rs-label {
+    font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .roadmap-step h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .roadmap-step p  { font-size: 13px; color: #4a5a78; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,0.45);
+    text-align: center; padding: 24px; font-size: 12px; letter-spacing: 0.5px;
+  }
+  footer strong { color: rgba(255,255,255,0.75); }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-inner">
+    <span class="header-badge">MCG Internal — User Guide v2.1</span>
+    <h1>MacGregor <span>QA/QC Checklist</span><br>User Guide</h1>
+    <p class="subtitle">Complete reference: opening the tool, inspecting drawings, approving, and troubleshooting — for AutoCAD design engineers.</p>
+    <div class="platform-badge">▪ AutoCAD — DWG Drawings</div>
+  </div>
+</header>
+
+<!-- ── NAV TABS ── -->
+<nav class="tabs">
+  <div class="tabs-inner">
+    <button class="tab-btn active" onclick="showTab('overview',this)">Overview</button>
+    <button class="tab-btn" onclick="showTab('workflow',this)">How to Use</button>
+    <button class="tab-btn" onclick="showTab('features',this)">Feature Details</button>
+    <button class="tab-btn" onclick="showTab('install',this)">Installation</button>
+    <button class="tab-btn" onclick="showTab('faq',this)">FAQ &amp; Troubleshooting</button>
+    <button class="tab-btn" onclick="showTab('vault',this)">Vault Integration</button>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+
+<!-- ════════════════════════════
+     TAB 1 — OVERVIEW
+════════════════════════════ -->
+<div id="overview" class="section active">
+  <h2 class="section-title">Overview</h2>
+
+  <div class="white-card">
+    <h3>What is the MacGregor QA/QC Checklist?</h3>
+    <p>An add-in integrated directly into <strong>AutoCAD</strong>, enabling engineers to carry out a structured <strong>Quality Assurance / Quality Control</strong> review of drawings before releasing them to Vault. Instead of paper checklists or standalone Excel files, all inspection data is embedded directly inside the <code class="cmd">.dwg</code> file.</p>
+    <p style="margin-top:10px;">Data travels with the drawing — share the DWG with anyone and they can open the tool to see the full QA/QC status.</p>
+  </div>
+
+  <div class="note-box">
+    <strong>⚠ When is the Checklist mandatory?</strong><br>
+    The checklist is <strong>required only for Main drawings</strong> — the final drawing that needs to be Released to Vault. Global drawings (WIP / team collaboration) may skip this step.
+  </div>
+
+  <div class="feat-grid" style="margin-top:24px;">
+    <div class="feat-item">
+      <div class="feat-icon">📋</div>
+      <h4>Checklist by drawing type</h4>
+      <p>Select Layout/Interface, Mechanical, or Structure — the tool automatically loads the correct checklist from the Excel template.</p>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">💾</div>
+      <h4>Data embedded in DWG</h4>
+      <p>Checklist progress is saved invisibly inside the DWG file. Reopen it anytime and your data is still there.</p>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">☁️</div>
+      <h4>Template sync from Vault</h4>
+      <p>Each time the tool opens, the latest Excel template is downloaded automatically from Vault — no manual file copying needed.</p>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">✏️</div>
+      <h4>Add custom check items</h4>
+      <p>Engineers can add project-specific inspection items (Custom Items) beyond the standard template list.</p>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">✅</div>
+      <h4>Sign &amp; Lock</h4>
+      <p>When finished, press APPROVE to record the approver's name and timestamp. The checklist locks automatically to prevent accidental edits.</p>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">🔄</div>
+      <h4>Auto-save 500 ms</h4>
+      <p>Every tick is auto-saved after 500 ms of inactivity — data is never lost even if the machine shuts down unexpectedly.</p>
+    </div>
+  </div>
+
+  <div class="white-card" style="margin-top:24px;">
+    <h3>Data Flow — Cache Priority when Opening a Drawing</h3>
+    <p style="font-size:13.5px;color:var(--muted);margin-bottom:14px;">When a drawing that has previously used the checklist is opened, the tool searches for existing data in this order:</p>
+    <div class="data-flow">
+      <div class="data-node primary">1️⃣ DWG file<br><span style="font-size:11px;font-weight:400;color:var(--muted);">Embedded in drawing</span></div>
+      <div class="data-arrow">→</div>
+      <div class="data-node">2️⃣ JSON local cache<br><span style="font-size:11px;font-weight:400;color:var(--muted);">%APPDATA%\MCGCadPlugin</span></div>
+      <div class="data-arrow">→</div>
+      <div class="data-node">3️⃣ Excel template<br><span style="font-size:11px;font-weight:400;color:var(--muted);">Downloaded from Vault</span></div>
+      <div class="data-arrow">→</div>
+      <div class="data-node green">Display Checklist</div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:10px;">If the drawing is brand new (checklist never used) → the tool shows <em>"Select a drawing type above"</em> and waits for you to choose a drawing type.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 2 — HOW TO USE
+════════════════════════════ -->
+<div id="workflow" class="section">
+  <h2 class="section-title">How to Use</h2>
+
+  <div class="steps">
+
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h3>Open the Checklist Palette</h3>
+        <p>In the AutoCAD Command Line, type:</p>
+        <div style="margin:10px 0;padding:12px 16px;background:#0d2045;border-radius:10px;font-family:'DM Mono',monospace;font-size:15px;color:#f0a500;">
+          Command: <strong>MCG_Checklist</strong>
+        </div>
+        <p>The <strong>MCG Tools</strong> palette panel appears on the right side of the AutoCAD screen. Running the command again while the panel is open simply brings it back into focus — no duplicate panel is created.</p>
+        <div class="note-box">
+          <strong>Drawing already has a Checklist?</strong> The panel automatically restores the correct checklist type and all previously ticked items — no need to re-select the drawing type from the dropdown.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h3>Select the Drawing Type</h3>
+        <p>If this is a new drawing (first time using the Checklist), the panel shows <em>"Select a drawing type above"</em>. Open the dropdown in the top-right corner and choose the appropriate type:</p>
+        <ul>
+          <li><strong>Layout / Interface</strong> — general arrangement, interface drawings</li>
+          <li><strong>Mechanical</strong> — mechanical detail drawings</li>
+          <li><strong>Structure</strong> — structural steel, panel drawings</li>
+        </ul>
+        <p>After selecting, the tool syncs the latest Excel template from Vault and loads the corresponding checklist (a loading overlay appears for a few seconds).</p>
+        <p>If Vault is unavailable, click the <strong>...</strong> button to manually browse for an Excel file on your computer.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <h3>Perform the Inspection</h3>
+        <ul>
+          <li>Tick the <strong>✓</strong> checkbox next to each item once you have verified it.</li>
+          <li>If an item <strong>does not apply</strong> to this drawing → tick the <strong>N/A</strong> column instead.</li>
+          <li>Both ✓ and N/A count toward the overall progress.</li>
+          <li>The <strong>Progress Bar</strong> updates the completion percentage instantly.</li>
+          <li>Data is <strong>auto-saved after 500 ms</strong> — no manual Save button required.</li>
+        </ul>
+        <div class="success-box">
+          <strong>Can I stop midway?</strong> Absolutely. Close AutoCAD or shut down the computer at any point — reopen the drawing the next day and the tool restores exactly where you left off.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <h3>Add a Custom Check Item</h3>
+        <p>If the standard checklist does not cover a project-specific criterion, you can add one manually:</p>
+        <ol>
+          <li>Type the item content into the <em>"Enter custom item content here..."</em> field at the bottom of the panel.</li>
+          <li>Click <strong>ADD NEW</strong>.</li>
+          <li>The custom item appears at the end of the list with a <span style="color:#dc2626;font-weight:700;">✕</span> button to delete it if needed.</li>
+        </ol>
+        <div class="note-box">Custom Items are saved inside the DWG. When the drawing is reopened, all custom items reappear at the end of the list.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num green">05</div>
+      <div class="step-body">
+        <h3>Sign Off — APPROVE</h3>
+        <p>Once the inspection is complete (or N/A has been set for non-applicable items), click the green <strong>APPROVE</strong> button at the bottom of the panel:</p>
+        <ul>
+          <li>If unchecked items remain → a warning dialog appears; confirm to proceed anyway.</li>
+          <li>The system automatically records the <strong>Windows username</strong> and <strong>approval timestamp</strong> inside the DWG.</li>
+          <li>Status changes to <strong>APPROVED</strong> (green), and the entire checklist locks.</li>
+        </ul>
+        <div class="success-box">
+          Drawing is <strong>APPROVED</strong> → ready to check in to Vault and request Release!
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num gold">06</div>
+      <div class="step-body">
+        <h3>Unlock for Re-inspection — RE-OPEN</h3>
+        <p>Already approved but need to make changes? Click the red <strong>RE-OPEN</strong> button:</p>
+        <ul>
+          <li>Status reverts to <strong>PENDING</strong> and the checklist is unlocked for editing.</li>
+          <li>The approver name and timestamp are cleared.</li>
+          <li>Previously ticked items are <strong>not removed</strong> — the checklist is simply unlocked for further adjustments.</li>
+        </ul>
+        <p>After re-inspecting, click <strong>APPROVE</strong> again to finalise.</p>
+        <div class="danger-box">
+          After RE-OPEN the drawing is no longer in APPROVED state. If it has already been checked in to Vault, a new check-in will be required after the second Approval.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 3 — FEATURE DETAILS
+════════════════════════════ -->
+<div id="features" class="section">
+  <h2 class="section-title">Feature Details</h2>
+
+  <!-- Dropdown -->
+  <div class="white-card">
+    <h3>Drawing Type Dropdown</h3>
+    <p>Each drawing type maps to a dedicated Excel template file stored on Vault:</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:14px 0;">
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--off-white);border-radius:8px;border:1px solid var(--border);">
+        <code class="cmd" style="min-width:160px;">Layout / Interface</code>
+        <span style="font-size:13px;color:var(--muted);">→ <code style="font-family:'DM Mono',monospace;font-size:12px;">Temp Checklist - LayoutInterface.xlsx</code></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--off-white);border-radius:8px;border:1px solid var(--border);">
+        <code class="cmd" style="min-width:160px;">Mechanical</code>
+        <span style="font-size:13px;color:var(--muted);">→ <code style="font-family:'DM Mono',monospace;font-size:12px;">Temp Checklist - Mechanical.xlsx</code></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--off-white);border-radius:8px;border:1px solid var(--border);">
+        <code class="cmd" style="min-width:160px;">Structure</code>
+        <span style="font-size:13px;color:var(--muted);">→ <code style="font-family:'DM Mono',monospace;font-size:12px;">Temp Checklist - Structure.xlsx</code></span>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);">When a type is selected, the tool: (1) connects to Vault, (2) downloads the latest Excel, (3) merges with any previously ticked data (Carry-over). The selected drawing type name is written into the DWG so it can be auto-restored next time.</p>
+  </div>
+
+  <!-- Sync Status -->
+  <div class="white-card">
+    <h3>Vault Sync Status</h3>
+    <p>A small line below the <em>"MCG CHECKLIST"</em> heading shows the origin of the Excel template currently in use:</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+      <div class="status-badge sync-ok" style="max-width:440px;">
+        ✓&nbsp; <strong>Vault ✔ 09:35</strong>&nbsp;— Latest template downloaded from Vault at 09:35
+      </div>
+      <div class="status-badge sync-off" style="max-width:440px;">
+        ⚠&nbsp; <strong>Vault offline — Login failed</strong>&nbsp;— Using previously cached local file
+      </div>
+      <div class="status-badge sync-loc" style="max-width:440px;">
+        📁&nbsp; <strong>Local file</strong>&nbsp;— Excel file selected manually
+      </div>
+    </div>
+    <div class="note-box" style="margin-top:14px;">Vault being offline <strong>does not affect</strong> the checklist — the tool uses the Excel file from the last successful download. Ticking and approving work as normal.</div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="white-card">
+    <h3>Progress Bar</h3>
+    <div class="two-col">
+      <div>
+        <h4>Calculation</h4>
+        <p style="font-size:13.5px;">% = (Items ✓ + Items N/A) ÷ Total items × 100</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">Both ✓ and N/A count toward completion.</p>
+      </div>
+      <div>
+        <h4>Display</h4>
+        <ul style="font-size:13.5px;">
+          <li>Blue bar <code style="background:#0078D4;color:white;padding:1px 6px;border-radius:3px;font-size:11px;">■</code> grows in real time.</li>
+          <li>Percentage shown on the right: <strong>72%</strong></li>
+          <li>Updates immediately on every tick or un-tick.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto-save -->
+  <div class="white-card">
+    <h3>Auto-save Debounce — 500 ms</h3>
+    <p>Every time you tick, un-tick, mark N/A, or add/delete a Custom Item, a 500 ms countdown starts. If no further action occurs within that window, data is automatically saved to:</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;">
+      <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;flex:1;min-width:160px;">
+        <strong style="color:var(--navy);">1. JSON local cache</strong><br>
+        <span style="color:var(--muted);font-size:12px;">%APPDATA%\MCGCadPlugin\</span>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 16px;font-size:13px;flex:1;min-width:160px;color:#15803d;">
+        <strong>2. DWG file</strong><br>
+        <span style="font-size:12px;">Embedded in the open drawing</span>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px;"><strong>Debounce</strong> means: if you tick 10 items in 2 seconds, the system writes to disk only once — after you pause for 500 ms — rather than on every individual tick.</p>
+  </div>
+
+  <!-- Carry-over -->
+  <div class="white-card">
+    <h3>Carry-over — Preserving Progress When the Excel Template Updates</h3>
+    <p>When Vault publishes a new version of the Excel template (questions added or modified), the tool performs an <strong>intelligent merge</strong> between the new template and existing ticked data:</p>
+    <ul style="margin-top:10px;padding-left:20px;font-size:14px;color:#4a5a78;">
+      <li>Questions that <strong>still exist</strong> in the new template (matching content) → tick state is preserved.</li>
+      <li>Questions <strong>newly added</strong> to the template → appear unticked.</li>
+      <li>Questions <strong>removed</strong> from the template → no longer shown.</li>
+      <li><strong>Custom Items</strong> → always retained and shown at the end of the list.</li>
+    </ul>
+  </div>
+
+  <!-- Approval Workflow -->
+  <div class="white-card">
+    <h3>Approval Workflow</h3>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:14px 0;">
+      <div class="data-node">PENDING<br><span style="font-size:11px;color:var(--muted);">Under review</span></div>
+      <div class="data-arrow">→ APPROVE →</div>
+      <div class="data-node green">APPROVED<br><span style="font-size:11px;">Signed off</span></div>
+      <div class="data-arrow">→ RE-OPEN →</div>
+      <div class="data-node">PENDING<br><span style="font-size:11px;color:var(--muted);">Unlocked</span></div>
+    </div>
+    <p style="font-size:13.5px;color:#4a5a78;margin-bottom:8px;"><strong>On APPROVE:</strong> writes Windows username (<code class="cmd">Environment.UserName</code>) and current timestamp into the DWG. All checkboxes and the ADD NEW field are locked.</p>
+    <p style="font-size:13.5px;color:#4a5a78;"><strong>On RE-OPEN:</strong> clears the approver name and timestamp, resets status to PENDING, and unlocks all checkboxes. Previously ticked items <strong>are not cleared</strong>.</p>
+
+    <div style="margin-top:16px;">
+      <h4>DOCUMENT STATUS examples</h4>
+      <div class="status-row">
+        <div class="status-badge approved">✅ APPROVED — John Smith · 15/06/2025 09:42</div>
+      </div>
+      <div class="status-row">
+        <div class="status-badge pending">⏳ PENDING — Inspection not yet complete</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Where data is stored -->
+  <div class="white-card">
+    <h3>Where Is the Data Stored Inside the DWG?</h3>
+    <p>The tool uses AutoCAD's <strong>Named Object Dictionary</strong> — a standard hidden data area of the DWG format that does not affect drawing geometry:</p>
+    <div style="background:#0f1e3a;border-radius:12px;padding:20px 24px;font-family:'DM Mono',monospace;font-size:13px;line-height:1.9;color:#c9d8f0;margin-top:14px;">
+      <div><span style="color:#6eb3fa;">DBDictionary</span> <span style="color:#f8c06b;">"MACGREGOR_QA_SYSTEM"</span></div>
+      <div style="padding-left:20px;">└── <span style="color:#6eb3fa;">XRecord</span> <span style="color:#f8c06b;">"CHECKLIST_DATA"</span></div>
+      <div style="padding-left:40px;">└── <span style="color:#91e0c8;">DxfCode.Text</span> × N chunks <span style="color:#4d6a99;">← JSON split into 250-character chunks</span></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px;">The full checklist JSON (questions, tick states, approver info…) is split into 250-character segments and stored in the XRecord. On read, the segments are reassembled and parsed back into an object.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 4 — INSTALLATION
+════════════════════════════ -->
+<div id="install" class="section">
+  <h2 class="section-title">Installation</h2>
+
+  <div class="steps">
+
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h3>Copy DLL files to the source folder</h3>
+        <p>Obtain all <code class="cmd">MCG_*.dll</code> files (from the build output or the Release folder provided by IT) and copy them to:</p>
+        <div style="margin:10px 0;"><span class="path">C:\CustomTools\Autocad\</span></div>
+        <p>The <code class="cmd">Install_AutoLoadCadAddin.bat</code> file must also be placed in this folder.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h3>Run the installation batch file</h3>
+        <p>Right-click <code class="cmd">Install_AutoLoadCadAddin.bat</code> → select <strong>"Run as Administrator"</strong>.</p>
+        <p>The script automatically:</p>
+        <ul>
+          <li>Creates <span class="path">%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\Contents\</span></li>
+          <li>Copies all <code class="cmd">MCG_*.dll</code> files into the Contents folder</li>
+          <li>Generates <code class="cmd">PackageContents.xml</code> so AutoCAD can discover the plugin</li>
+        </ul>
+        <div class="danger-box">
+          Must be run as <strong>Administrator</strong>. Without elevated privileges the script reports <em>"Cannot create directory"</em> and exits immediately.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num green">03</div>
+      <div class="step-body">
+        <h3>Restart AutoCAD</h3>
+        <p>Restart AutoCAD so the plugin is loaded automatically. Verify by typing:</p>
+        <div style="margin:10px 0;padding:10px 16px;background:#0d2045;border-radius:8px;font-family:'DM Mono',monospace;font-size:14px;color:#f0a500;">
+          Command: <strong>MCG_Checklist</strong>
+        </div>
+        <p>If the <strong>MCG Tools</strong> panel appears → installation was successful.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Updating -->
+  <div class="white-card" style="margin-top:28px;">
+    <h3>Updating to a New Version</h3>
+    <p>When a new plugin version is released:</p>
+    <ol style="padding-left:20px;font-size:14px;color:#4a5a78;margin-top:8px;">
+      <li>Close AutoCAD.</li>
+      <li>Copy the new DLL files into <span class="path">C:\CustomTools\Autocad\</span>, overwriting the old ones.</li>
+      <li>Re-run <code class="cmd">Install_AutoLoadCadAddin.bat</code> as Administrator.</li>
+      <li>Reopen AutoCAD.</li>
+    </ol>
+    <div class="success-box" style="margin-top:12px;">Checklist data stored in existing DWG files is <strong>not affected</strong> by a plugin update — data lives in the drawings, not in the plugin itself.</div>
+  </div>
+
+  <!-- NETLOAD -->
+  <div class="white-card">
+    <h3>Manual Load via NETLOAD (for testing only)</h3>
+    <p>Use this method for a quick test without going through the full installation:</p>
+    <ol style="padding-left:20px;font-size:14px;color:#4a5a78;margin-top:8px;">
+      <li>Open AutoCAD and open any drawing.</li>
+      <li>Type <code class="cmd">NETLOAD</code> in the Command Line.</li>
+      <li>Browse to <code class="cmd">MCG_Checklist.dll</code> and click <strong>Open</strong>.</li>
+      <li>If a security warning appears → choose <em>Always Load</em>.</li>
+      <li>Type <code class="cmd">MCG_Checklist</code> to open the panel.</li>
+    </ol>
+    <div class="note-box" style="margin-top:10px;">NETLOAD only loads the plugin for the current AutoCAD session. Closing and reopening AutoCAD unloads it — you must NETLOAD again. Use the batch-file installation to have the plugin load automatically on every startup.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 5 — FAQ
+════════════════════════════ -->
+<div id="faq" class="section">
+  <h2 class="section-title">FAQ &amp; Troubleshooting</h2>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: I typed <code class="cmd">MCG_Checklist</code> but AutoCAD says "Unknown command"?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      The plugin has not been loaded into this AutoCAD session. Check in order:
+      <ol>
+        <li>If using auto-load: verify that <span class="path">%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\Contents\</span> contains a <code class="cmd">MCG_Checklist*.dll</code> file. If not — re-run <code class="cmd">Install_AutoLoadCadAddin.bat</code> as <strong>Administrator</strong>, then <strong>restart AutoCAD</strong>.</li>
+        <li>If using NETLOAD: run the <code class="cmd">NETLOAD</code> command again and select the correct DLL.</li>
+        <li>Still failing: open <strong>DebugView</strong> (Sysinternals) or the VS Output window and look for log entries with the prefix <code class="cmd">[PaletteManager]</code> for detailed error information.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: The drawing type dropdown is greyed out and cannot be clicked?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      The dropdown is disabled while data is loading (the loading overlay is visible). Wait for the overlay to disappear — this normally takes under 10 seconds on a healthy Vault connection. If the loading spinner persists after 30 seconds, check your network connection to the Vault server. Once the Vault connection times out the tool falls back to the local cache and the dropdown automatically re-enables.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: I reopened a DWG but the checklist starts from scratch — previous data is gone?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      This can happen for one of the following reasons:
+      <ul>
+        <li><strong>DWG saved by third-party software</strong> (AutoCAD LT, eDrawings, DWG viewers…) — these applications can strip the Named Object Dictionary, removing all embedded data. Always save using full AutoCAD.</li>
+        <li><strong>AutoCAD closed too quickly</strong> after the last tick: the 500 ms debounce timer may not have had time to write. Going forward, wait about 1 second after your last action before closing.</li>
+        <li><strong>DWG predates the plugin</strong>: the first time you open a drawing with the plugin, you must select the drawing type from the dropdown. After that, data is saved and auto-restored on every subsequent open.</li>
+      </ul>
+      Check the JSON cache at <span class="path">%APPDATA%\MCGCadPlugin\</span> — if the JSON file is still present, the tool will read from it when no data is found in the DWG.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: My computer shut down unexpectedly — will I lose checklist data?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      <strong>Risk is very low.</strong> The 500 ms auto-save debounce ensures data is written to the JSON cache every time you pause for 500 ms — this happens before the DWG write. On reopen, the tool reads the DWG first; if the DWG write was incomplete (e.g. power cut mid-save) it falls back to the JSON cache. Data is only completely lost if the machine shuts down at the exact moment both the DWG and the JSON are being written simultaneously — an extremely rare scenario.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: The panel loads a checklist automatically when I open the tool — I didn't select anything?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      This is the <strong>auto-restore</strong> feature: if the currently open DWG already contains checklist data (stored in its Named Object Dictionary), the tool detects which drawing type was previously selected and reloads the exact same checklist — no dropdown selection required. To switch to a different checklist type, simply choose a new option from the dropdown. The tool will carry over your existing progress into the new template (Carry-over merge).
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: The "Vault offline" message appears — can I still use the checklist?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      <strong>Yes</strong>, everything works normally. "Vault offline" only means the tool could not download the latest Excel template — it falls back to the version downloaded during the previous session (local cache). Ticking, approving, and saving all function as usual. The next time the tool opens with an active Vault connection, the template will be re-synced automatically.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: How do I know whether a drawing has already been Approved?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Open the drawing in AutoCAD → type <code class="cmd">MCG_Checklist</code>. The <strong>DOCUMENT STATUS</strong> section at the bottom of the panel shows:
+      <ul>
+        <li style="color:#16a34a;font-weight:600;">✅ APPROVED — [Username] · [Approval date &amp; time]</li>
+        <li style="color:#c2410c;font-weight:600;">⏳ PENDING — Inspection not yet complete</li>
+      </ul>
+      If the drawing has never used the checklist, the panel shows "Select a drawing type above" with no status indicator.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: I want to switch the checklist type for a drawing (e.g. from Structure to Mechanical)?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Simply select the new type from the dropdown. The tool loads the Mechanical template and <strong>merges (Carry-over)</strong> it with your existing ticked data. Items whose content matches between the two templates retain their tick state; new items in the Mechanical template appear unticked. Custom Items are always preserved. The new drawing type name is saved to the DWG for auto-restore next time.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: The Excel checklist template was updated — will my ticked data be lost?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      No. The <strong>Carry-over</strong> feature automatically merges the new template with existing data:
+      <ul>
+        <li>Questions still present in the new template → tick state preserved.</li>
+        <li>Newly added questions → appear unticked.</li>
+        <li>Custom Items → always retained.</li>
+      </ul>
+      You only need to tick the new questions — there is no need to redo the entire checklist.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: After Approving, can I view the checklist without unlocking it?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Yes. When a drawing is in APPROVED state, the panel still displays the full list of questions with all tick states visible — the checkboxes are simply locked and cannot be clicked. You can scroll through everything and see the approver name and approval timestamp at the bottom. Only clicking RE-OPEN will unlock the checklist for editing.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 6 — VAULT INTEGRATION
+════════════════════════════ -->
+<div id="vault" class="section">
+  <h2 class="section-title">Vault Integration</h2>
+
+  <!-- Current -->
+  <div class="white-card">
+    <h3>Current Integration — Excel Template Sync from Vault</h3>
+    <p>Every time a drawing type is selected from the dropdown, the tool automatically connects to Vault and downloads the latest Excel template. The process:</p>
+    <div style="display:flex;flex-direction:column;gap:0;margin-top:18px;">
+
+      <div style="display:flex;gap:0;align-items:stretch;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">1</div>
+          <div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div>
+        </div>
+        <div style="padding:0 0 16px 14px;font-size:13.5px;color:#4a5a78;">
+          Reads <code class="cmd">LoginHistory.xml</code> (<span class="path">%APPDATA%\Autodesk\VaultCommon\</span>) to detect the active Vault server — no manual entry required.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;align-items:stretch;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">2</div>
+          <div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div>
+        </div>
+        <div style="padding:0 0 16px 14px;font-size:13.5px;color:#4a5a78;">
+          Logs in to Vault with <code class="cmd">AutoLoginMode = RestoreAndExecute</code> — reuses the active Vault session silently, with no login dialog shown to the user.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;align-items:stretch;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">3</div>
+          <div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div>
+        </div>
+        <div style="padding:0 0 16px 14px;font-size:13.5px;color:#4a5a78;">
+          Downloads the Excel file from the Vault path configured in <code class="cmd">appsettings.json</code> → saves it to the local working folder.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">4</div>
+        </div>
+        <div style="padding:0 0 0 14px;font-size:13.5px;color:#4a5a78;">
+          Parses the Excel content, merges with previous progress (Carry-over), and renders the checklist.
+        </div>
+      </div>
+
+    </div>
+    <div class="note-box" style="margin-top:16px;">If Vault is unreachable, the tool falls back to the Excel file downloaded during the last successful sync. The checklist continues to work normally.</div>
+  </div>
+
+  <!-- Roadmap -->
+  <div class="roadmap-card">
+    <span class="roadmap-badge">ROADMAP — Not yet implemented</span>
+    <h3 style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;">Full Automation: Block Release Until Approved</h3>
+    <p style="font-size:14px;color:#4a5a78;margin-bottom:4px;">Long-term goal: Vault automatically <strong>rejects</strong> any attempt to transition a drawing to <strong>Released</strong> status if the engineer has not yet Approved the checklist. The rollout plan has 4 steps:</p>
+
+    <div class="roadmap-step">
+      <div class="rs-label">STEP 0 — Development</div>
+      <h4>Add a Bridge Drawing Property in the Add-in</h4>
+      <p>When the user clicks Approve, the add-in writes a Custom Drawing Property <code class="cmd">MacGregor_QA = "APPROVED"</code> to the DWG (via SummaryInfo or DwgProperty). Vault can read this property directly. On RE-OPEN → the property is cleared.</p>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="rs-label">STEP 1 — Vault Admin</div>
+      <h4>Create a Property in Vault</h4>
+      <p><strong>Tools → Administration → Vault Settings → Behaviors → Properties</strong> → Create a property named <code class="cmd">QA Status</code> (type: Text).</p>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="rs-label">STEP 2 — Vault Admin</div>
+      <h4>Map DWG Property → Vault Property</h4>
+      <p>In the Mapping tab of the property: Entity = File, Provider = AutoCAD, File Property = <code class="cmd">MacGregor_QA</code>, Direction = File → Vault.</p>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="rs-label">STEP 3 — Vault Admin</div>
+      <h4>Add a Lifecycle Criterion</h4>
+      <p><strong>Vault Settings → Behaviors → Lifecycles</strong> → Edit the Main drawing lifecycle → select the <em>Work in Progress → Released</em> transition → Criteria tab: add condition <code class="cmd">QA Status is APPROVED</code>.</p>
+    </div>
+
+    <div class="success-box" style="margin-top:18px;">
+      <strong>Result after all 4 steps:</strong> When a reviewer tries to Release a drawing that has not been QA-Approved, Vault displays an error and refuses — the QA/QC process becomes fully automated and impossible to bypass.
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <strong>MacGregor VN</strong> — QA/QC Checklist User Guide v2.1 — AutoCAD &nbsp;|&nbsp; Internal Use Only &nbsp;|&nbsp; Updated: 2026-06-16
+</footer>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const ans  = el.nextElementSibling;
+    item.classList.toggle('open');
+    ans.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

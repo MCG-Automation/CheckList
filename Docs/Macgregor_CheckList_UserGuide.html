@@ -1,251 +1,905 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hướng dẫn sử dụng MacGregor QA/QC Checklist</title>
-    <style>
-        :root {
-            --primary-color: #005E9E;
-            --success-color: #4CAF50;
-            --warning-color: #FFB300;
-            --danger-color: #D32F2F;
-            --text-color: #333;
-            --bg-color: #F8F9FA;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: #E9ECEF;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            background: #FFF;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h1, h2, h3 {
-            color: var(--primary-color);
-        }
-        h1 {
-            text-align: center;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-        }
-        h2 {
-            border-left: 5px solid var(--primary-color);
-            padding-left: 15px;
-            background-color: #f0f7fb;
-            padding: 10px 15px;
-            margin-top: 40px;
-        }
-        .note {
-            background-color: #FFF3CD;
-            border-left: 5px solid var(--warning-color);
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .success-box {
-            background-color: #D4EDDA;
-            border-left: 5px solid var(--success-color);
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .admin-section {
-            background-color: #F8D7DA;
-            border: 2px dashed var(--danger-color);
-            padding: 20px;
-            margin: 30px 0;
-            border-radius: 8px;
-        }
-        .admin-section h2 {
-            background-color: transparent;
-            color: var(--danger-color);
-            border-left-color: var(--danger-color);
-            margin-top: 0;
-        }
-        ol, ul {
-            padding-left: 25px;
-        }
-        li {
-            margin-bottom: 10px;
-        }
-        code {
-            background-color: #eee;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: Consolas, monospace;
-            color: #d63384;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            color: white;
-        }
-        .badge.cad { background-color: #D32F2F; }
-        .badge.inv { background-color: #F57C00; }
-        .faq-question {
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-top: 20px;
-        }
-        .faq-answer {
-            margin-left: 20px;
-            border-left: 2px solid #ccc;
-            padding-left: 15px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MacGregor QA/QC Checklist — Hướng dẫn Sử dụng</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:       #0d2045;
+    --navy-mid:   #1a3060;
+    --navy-light: #253d72;
+    --accent:     #c0392b;
+    --gold:       #f0a500;
+    --green:      #16a34a;
+    --white:      #ffffff;
+    --off-white:  #f4f6fb;
+    --text:       #1e2d4a;
+    --muted:      #6b7fa3;
+    --border:     #dce3f0;
+    --code-bg:    #eef2fa;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, var(--navy-light) 100%);
+    color: var(--white);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(192,57,43,0.18) 0%, transparent 65%);
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 32px; background: var(--off-white);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+  .header-inner { max-width: 960px; margin: auto; position: relative; z-index: 1; }
+  .header-badge {
+    display: inline-block;
+    background: rgba(192,57,43,0.85); color: var(--white);
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    padding: 4px 14px; border-radius: 20px; margin-bottom: 18px;
+  }
+  header h1 {
+    font-size: clamp(26px, 4vw, 42px); font-weight: 700; line-height: 1.2; margin-bottom: 10px;
+  }
+  header h1 span { color: var(--gold); }
+  header p.subtitle { font-size: 15px; color: rgba(255,255,255,0.65); max-width: 540px; }
+  .platform-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(192,57,43,0.35); border: 1px solid rgba(255,255,255,0.25);
+    color: var(--white); font-size: 12px; font-weight: 600;
+    padding: 5px 14px; border-radius: 20px; margin-top: 20px;
+  }
+
+  /* ── NAV TABS ── */
+  nav.tabs {
+    background: var(--white);
+    box-shadow: 0 2px 12px rgba(13,32,69,0.08);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .tabs-inner {
+    max-width: 960px; margin: auto;
+    display: flex; gap: 4px; padding: 0 24px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs-inner::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none;
+    padding: 16px 18px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--muted); cursor: pointer; white-space: nowrap;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  .tab-btn:hover { color: var(--navy); }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--accent); }
+
+  /* ── MAIN ── */
+  main { max-width: 960px; margin: 40px auto; padding: 0 24px 80px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-title {
+    font-size: 28px; font-weight: 700; color: var(--navy);
+    margin-bottom: 32px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--border); position: relative;
+  }
+  .section-title::after {
+    content: ''; position: absolute; bottom: -2px; left: 0;
+    width: 60px; height: 2px; background: var(--accent);
+  }
+
+  /* ── STEP CARDS ── */
+  .steps { display: flex; flex-direction: column; gap: 20px; }
+  .step-card {
+    background: var(--white); border-radius: 16px;
+    padding: 28px 32px; display: flex; gap: 24px; align-items: flex-start;
+    box-shadow: 0 2px 16px rgba(13,32,69,0.07); border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .step-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(13,32,69,0.12); }
+  .step-num {
+    flex-shrink: 0; width: 52px; height: 52px;
+    background: var(--navy); color: var(--white); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700;
+  }
+  .step-num.green { background: var(--green); }
+  .step-num.gold  { background: #d97706; }
+  .step-body h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+  .step-body p  { font-size: 14px; color: #4a5a78; margin-bottom: 8px; }
+  .step-body ul { padding-left: 20px; margin-top: 6px; }
+  .step-body ul li { font-size: 14px; color: #4a5a78; margin-bottom: 6px; }
+  .step-body ul strong { color: var(--navy); }
+  .step-body ol { padding-left: 20px; margin-top: 8px; }
+  .step-body ol li { font-size: 14px; color: #4a5a78; margin-bottom: 6px; }
+
+  /* ── TAGS ── */
+  .cmd {
+    display: inline-block; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+    color: var(--navy); background: var(--code-bg); border: 1px solid #c9d4ea;
+    border-radius: 6px; padding: 3px 9px;
+  }
+  .path {
+    display: inline-block; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+    color: var(--accent); background: #fdf0ef; border: 1px solid #f5c6c2;
+    border-radius: 6px; padding: 3px 9px;
+  }
+
+  /* ── CALLOUT BOXES ── */
+  .note-box {
+    background: #fffbea; border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0; padding: 13px 17px; margin: 14px 0;
+    font-size: 13.5px; color: #5a4400;
+  }
+  .success-box {
+    background: #f0fdf4; border-left: 4px solid var(--green);
+    border-radius: 0 8px 8px 0; padding: 13px 17px; margin: 14px 0;
+    font-size: 13.5px; color: #14532d;
+  }
+  .danger-box {
+    background: #fef2f2; border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0; padding: 13px 17px; margin: 14px 0;
+    font-size: 13.5px; color: #7f1d1d;
+  }
+
+  /* ── WHITE CARD ── */
+  .white-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px 32px; box-shadow: 0 2px 16px rgba(13,32,69,0.07); margin-bottom: 24px;
+  }
+  .white-card h3 { font-size: 17px; font-weight: 700; color: var(--navy); margin-bottom: 14px; }
+  .white-card h4 { font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .white-card p  { font-size: 14px; color: #4a5a78; margin-bottom: 8px; }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── FEATURE GRID ── */
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 16px; }
+  .feat-item {
+    background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px; box-shadow: 0 1px 8px rgba(13,32,69,0.05);
+  }
+  .feat-icon { font-size: 24px; margin-bottom: 8px; }
+  .feat-item h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .feat-item p  { font-size: 13px; color: var(--muted); }
+
+  /* ── DATA FLOW ── */
+  .data-flow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+  .data-node {
+    background: var(--white); border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--navy);
+    box-shadow: 0 1px 6px rgba(13,32,69,0.06);
+  }
+  .data-node.primary { border-color: #6eb3fa; background: #eef6ff; }
+  .data-node.green   { border-color: #86efac; background: #f0fdf4; color: var(--green); }
+  .data-arrow { color: var(--muted); font-size: 18px; font-weight: 700; }
+
+  /* ── STATUS BADGES ── */
+  .status-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 8px; padding: 10px 16px; font-size: 13px; font-weight: 600;
+  }
+  .status-badge.approved { background: #f0fdf4; border: 1.5px solid #86efac; color: var(--green); }
+  .status-badge.pending  { background: #fff7ed; border: 1.5px solid #fdba74; color: #c2410c; }
+  .status-badge.sync-ok  { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
+  .status-badge.sync-off { background: #fff7ed; border: 1.5px solid #fdba74; color: #9a3412; }
+  .status-badge.sync-loc { background: var(--code-bg); border: 1.5px solid #c9d4ea; color: var(--muted); }
+
+  /* ── FAQ ── */
+  .faq-item { margin-bottom: 16px; }
+  .faq-q {
+    font-size: 14.5px; font-weight: 700; color: var(--navy);
+    padding: 13px 16px; background: var(--code-bg); border-radius: 8px;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--border); user-select: none;
+  }
+  .faq-q:hover { background: #e6ecf8; }
+  .faq-chevron { color: var(--muted); font-size: 12px; flex-shrink: 0; margin-left: 12px; transition: transform 0.2s; }
+  .faq-a {
+    display: none; padding: 14px 18px; font-size: 13.5px; color: #4a5a78;
+    border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 8px 8px; background: var(--white); line-height: 1.75;
+  }
+  .faq-a.open { display: block; }
+  .faq-item.open .faq-chevron { transform: rotate(90deg); }
+  .faq-a ol, .faq-a ul { padding-left: 20px; margin-top: 8px; }
+  .faq-a li { margin-bottom: 6px; }
+
+  /* ── ROADMAP ── */
+  .roadmap-card {
+    background: var(--white); border: 2px dashed #fca5a5;
+    border-radius: 14px; padding: 28px 32px; margin-bottom: 20px;
+  }
+  .roadmap-badge {
+    display: inline-block; background: #fee2e2; color: var(--accent);
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; margin-bottom: 12px;
+  }
+  .roadmap-step {
+    background: var(--off-white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+  }
+  .roadmap-step .rs-label {
+    font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .roadmap-step h4 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .roadmap-step p  { font-size: 13px; color: #4a5a78; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,0.45);
+    text-align: center; padding: 24px; font-size: 12px; letter-spacing: 0.5px;
+  }
+  footer strong { color: rgba(255,255,255,0.75); }
+</style>
 </head>
 <body>
 
-<div class="container">
-    <h1>HƯỚNG DẪN SỬ DỤNG MACGREGOR CHECKLIST</h1>
-    
-    <p>Chào mừng bạn đến với tài liệu hướng dẫn sử dụng công cụ <strong>MacGregor Checklist</strong>. Add-in này được thiết kế để chuẩn hóa và tự động hóa quy trình kiểm tra bản vẽ (Quality Assurance / Quality Control) trực tiếp trên nền tảng <strong>AutoCAD</strong> trước khi phát hành (Release) lên hệ thống Vault. <em>(Phiên bản Inventor: roadmap.)</em></p>
+<!-- ── HEADER ── -->
+<header>
+  <div class="header-inner">
+    <span class="header-badge">MCG Internal — User Guide v2.1</span>
+    <h1>MacGregor <span>QA/QC Checklist</span><br>Hướng dẫn Sử dụng</h1>
+    <p class="subtitle">Hướng dẫn đầy đủ: mở tool, kiểm tra bản vẽ, phê duyệt và khắc phục sự cố — dành cho kỹ sư thiết kế AutoCAD.</p>
+    <div class="platform-badge">▪ AutoCAD — Bản vẽ DWG</div>
+  </div>
+</header>
 
-    <div class="note">
-        <strong>Lưu ý về Phân loại Bản vẽ:</strong> Công cụ Checklist này <strong>CHỈ BẮT BUỘC</strong> đối với các <strong>Bản vẽ Main (Bản vẽ cuối cùng cần Release)</strong>. Đối với các bản vẽ Global (WIP) dùng để chia sẻ và phối hợp nhóm, kỹ sư có thể bỏ qua bước kiểm tra này.
+<!-- ── NAV TABS ── -->
+<nav class="tabs">
+  <div class="tabs-inner">
+    <button class="tab-btn active" onclick="showTab('overview',this)">Tổng quan</button>
+    <button class="tab-btn" onclick="showTab('workflow',this)">Quy trình sử dụng</button>
+    <button class="tab-btn" onclick="showTab('features',this)">Tính năng chi tiết</button>
+    <button class="tab-btn" onclick="showTab('install',this)">Cài đặt</button>
+    <button class="tab-btn" onclick="showTab('faq',this)">FAQ &amp; Lỗi thường gặp</button>
+    <button class="tab-btn" onclick="showTab('vault',this)">Vault Integration</button>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main>
+
+<!-- ════════════════════════════
+     TAB 1 — TỔNG QUAN
+════════════════════════════ -->
+<div id="overview" class="section active">
+  <h2 class="section-title">Tổng quan</h2>
+
+  <div class="white-card">
+    <h3>MacGregor QA/QC Checklist là gì?</h3>
+    <p>Add-in tích hợp trực tiếp vào <strong>AutoCAD</strong>, giúp kỹ sư thực hiện quy trình <strong>kiểm tra chất lượng (QA/QC)</strong> bản vẽ một cách có hệ thống trước khi phát hành lên Vault. Thay vì dùng checklist giấy hoặc file Excel rời, mọi dữ liệu kiểm tra được nhúng trực tiếp vào file <code class="cmd">.dwg</code>.</p>
+    <p style="margin-top:10px;">Dữ liệu theo bản vẽ — gửi file DWG cho bất kỳ ai, họ cũng thấy trạng thái QA/QC đầy đủ khi mở tool.</p>
+  </div>
+
+  <div class="note-box">
+    <strong>⚠ Khi nào BẮT BUỘC dùng Checklist?</strong><br>
+    Checklist <strong>chỉ bắt buộc</strong> với các <strong>bản vẽ Main</strong> — bản vẽ cuối cần Release lên Vault. Các bản vẽ Global (WIP / phối hợp nhóm) có thể bỏ qua.
+  </div>
+
+  <div class="feat-grid" style="margin-top:24px;">
+    <div class="feat-item">
+      <div class="feat-icon">📋</div>
+      <h4>Checklist theo loại bản vẽ</h4>
+      <p>Chọn Layout/Interface, Mechanical hoặc Structure — tool tự load đúng danh sách kiểm tra từ template Excel.</p>
     </div>
-
-    <h2>1. Hướng dẫn Cài đặt & Khởi chạy (Dành cho Người dùng)</h2>
-    
-    <h3><span class="badge cad">AutoCAD</span> Đối với người dùng AutoCAD</h3>
-    <p><strong>Cách 1 — Auto-load qua bộ cài (khuyến nghị cho người dùng cuối):</strong> sau khi IT chạy <code>Install_AutoLoadCadAddin.bat</code>, plugin được copy vào <code>%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\</code>. AutoCAD tự nạp plugin mỗi lần khởi động — bạn chỉ cần gõ <code>MCG_Checklist</code> để mở Palette.</p>
-    <p><strong>Cách 2 — NETLOAD thủ công (dùng khi test/debug):</strong></p>
-    <ol>
-        <li>Lấy file <code>MCG_Checklist.dll</code> (bản Release) hoặc <code>MCG_Checklist_&lt;timestamp&gt;.dll</code> (bản Debug) và lưu vào vị trí cố định (VD: <code>C:\CustomTools\Autocad\</code>).</li>
-        <li>Mở AutoCAD và mở một bản vẽ bất kỳ.</li>
-        <li>Gõ lệnh <code>NETLOAD</code> trên Command Line, duyệt đến file DLL và bấm <strong>Open</strong>. (Nếu có cảnh báo bảo mật, chọn <em>Always Load</em>.)</li>
-        <li>Gõ lệnh <code>MCG_Checklist</code> để mở Palette. Đóng Palette bằng nút <strong>Close (×)</strong> trên giao diện.</li>
-    </ol>
-
-    
-    <h2>2. Hướng dẫn Sử dụng Checklist</h2>
-
-    <p>Sau khi khởi chạy công cụ, hãy chuyển sang tab <strong>DRAWING</strong> trên giao diện chính.</p>
-
-    <h3>Bước 1: Mở Checklist</h3>
-    <ul>
-        <li>Chọn loại bản vẽ hiện tại (VD: Structure, Layout,...).</li>
-        <li>Bấm nút <strong>OPEN CHECKLIST</strong>.</li>
-    </ul>
-
-    <h3>Bước 2: Thực hiện kiểm tra</h3>
-    <ul>
-        <li>Một cửa sổ Popup sẽ hiện ra danh sách các tiêu chí cần kiểm tra. Hãy đối chiếu với bản vẽ của bạn và tick vào các ô tương ứng.</li>
-        <li>Thanh Tiến trình (Progress Bar) sẽ hiển thị % hoàn thành.</li>
-        <li>Bạn có thể thêm các câu hỏi kiểm tra bổ sung bằng cách gõ vào ô <em>Add Custom Item</em> và bấm nút <strong>+</strong>.</li>
-        <li>Nếu chưa kiểm tra xong, bạn có thể bấm <strong>Save Draft</strong>. Thông tin sẽ được lưu ẩn vào bản vẽ, bạn có thể tắt máy và mở lại kiểm tra tiếp vào hôm sau mà không bị mất dữ liệu.</li>
-    </ul>
-
-    <h3>Bước 3: Ký duyệt (Sign & Approve)</h3>
-    <ul>
-        <li>Khi bạn đã tick đủ <strong>100%</strong> các mục, nút <strong>SIGN &amp; APPROVE</strong> sẽ sáng lên màu xanh.</li>
-        <li>Bấm vào nút này để chốt kiểm tra. Hệ thống ghi Tên Windows User và Thời gian duyệt vào dữ liệu ẩn của bản vẽ (DBDictionary <code>MACGREGOR_QA_SYSTEM</code>).</li>
-        <li><strong>Kết quả:</strong> Một MessageBox <em>"Drawing successfully Approved and Signed!"</em> hiện lên xác nhận. Header DRAWING STATUS trên Palette chuyển sang <strong>APPROVED (READY FOR RELEASE)</strong> kèm tên người duyệt và thời gian; toàn bộ checklist bị khoá để tránh chỉnh sửa nhầm.</li>
-    </ul>
-
-    <div class="success-box">
-        <strong>Hoàn tất:</strong> Bây giờ bản vẽ Main của bạn đã đạt chuẩn nội bộ và sẵn sàng để Check-in lên Vault để xin Release!
+    <div class="feat-item">
+      <div class="feat-icon">💾</div>
+      <h4>Dữ liệu nhúng vào DWG</h4>
+      <p>Tiến độ tích checklist được lưu ẩn bên trong file DWG. Mở lại bất kỳ lúc nào, dữ liệu vẫn còn nguyên.</p>
     </div>
-
-    <div class="admin-section">
-        <h2>3. Tích hợp Vault: Tự động hóa chặn Release 100% <span style="background:#FFB300;color:white;font-size:13px;padding:4px 10px;border-radius:4px;margin-left:8px;vertical-align:middle;letter-spacing:0.5px;">ROADMAP — CHƯA TRIỂN KHAI</span></h2>
-        <div class="note">
-            <strong>⚠ Trạng thái hiện tại:</strong> Add-in mới chỉ lưu Checklist data vào <strong>dữ liệu ẩn nội bộ</strong> của file DWG (DBDictionary <code>MACGREGOR_QA_SYSTEM</code> + XRecord <code>CHECKLIST_DATA</code>). Vault <strong>không đọc trực tiếp</strong> được DBDictionary vì nó không phải iProperty/DwgProperty. Cần triển khai thêm một <em>bridge property</em> ở phía Add-in (Bước 0 dưới đây) trước khi Vault Admin thực hiện cấu hình mapping. Phần này được giữ ở đây làm <strong>bản thiết kế tham chiếu cho team Dev</strong>.
-        </div>
-        <p>Mục tiêu: hệ thống đạt tự động hóa 100% — <strong>ngăn chặn (block)</strong> người duyệt bấm chuyển trạng thái sang <strong>Released</strong> trên Vault nếu bản vẽ Main chưa được Approve.</p>
-
-        <p>Quy trình triển khai trong tương lai gồm 4 bước (Bước 0 do Dev, Bước 1–3 do IT/Vault Admin):</p>
-
-        <ol>
-            <li><strong>Bước 0 — Thêm bridge property trong Add-in (Dev):</strong>
-                <ul>
-                    <li>Khi user bấm Approve thành công, Add-in ghi giá trị <code>"APPROVED"</code> vào một Custom Drawing Property tên <code>MacGregor_QA</code> (qua <code>Database.SummaryInfo</code> hoặc <code>DwgProperty</code>).</li>
-                    <li>Đây là property mà Vault có thể đọc được. DBDictionary nội bộ vẫn giữ làm dữ liệu chính cho UI; bridge property chỉ là "cờ" cho Vault.</li>
-                    <li>Khi user bấm Reset, đồng thời xoá luôn property này (hoặc set về rỗng).</li>
-                </ul>
-            </li>
-            <li><strong>Tạo thuộc tính trên Vault:</strong>
-                <ul>
-                    <li>Vào <em>Tools > Administration > Vault Settings > Behaviors > Properties</em>.</li>
-                    <li>Tạo một Property mới tên là <code>QA Status</code> (Kiểu dữ liệu: Text).</li>
-                </ul>
-            </li>
-            <li><strong>Ánh xạ (Mapping) dữ liệu từ CAD:</strong>
-                <ul>
-                    <li>Chuyển sang tab <strong>Mapping</strong> của Property vừa tạo.</li>
-                    <li>Cấu hình Entity: <code>File</code>.</li>
-                    <li>Provider: Chọn <code>AutoCAD</code>.</li>
-                    <li>File Property: Nhập chính xác tên biến là <code>MacGregor_QA</code> (chính là bridge property mà Bước 0 sinh ra).</li>
-                    <li>Direction: <code>File -> Vault</code>.</li>
-                </ul>
-            </li>
-            <li><strong>Khóa van an toàn (Lifecycle Criteria):</strong>
-                <ul>
-                    <li>Vào <em>Vault Settings > Behaviors > Lifecycles</em>. Edit Lifecycle đang dùng cho bản vẽ Main.</li>
-                    <li>Chọn chuyển giao (Transition) từ trạng thái <strong>Work in Progress -> Released</strong> và bấm Edit.</li>
-                    <li>Chuyển sang tab <strong>Criteria</strong>. Thêm một điều kiện bắt buộc: <strong><code>QA Status</code> <code>is</code> <code>APPROVED</code></strong>.</li>
-                </ul>
-            </li>
-        </ol>
-        <p><em>Kết quả khi hoàn thành cả 4 bước: Khi người duyệt bấm "Change State -> Released" cho một bản vẽ chưa làm Checklist, Vault sẽ hiện bảng lỗi màu đỏ chặn lại, yêu cầu Kỹ sư phải mở CAD lên tick Checklist. Quy trình khép kín hoàn toàn.</em></p>
+    <div class="feat-item">
+      <div class="feat-icon">☁️</div>
+      <h4>Đồng bộ template từ Vault</h4>
+      <p>Mỗi lần mở tool, template Excel mới nhất được tải tự động từ Vault Server — không cần copy file thủ công.</p>
     </div>
-
-    <h2>4. Câu hỏi thường gặp (FAQ) & Khắc phục sự cố</h2>
-
-    <div class="faq-question">Q1: Tôi gõ <code>MCG_Checklist</code> nhưng AutoCAD báo "Unknown command"?</div>
-    <div class="faq-answer">
-        A: Plugin chưa được nạp vào phiên AutoCAD. Kiểm tra theo thứ tự:
-        <ol>
-            <li>Nếu dùng auto-load: kiểm tra folder <code>%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\Contents\</code> có chứa <code>MCG_Checklist*.dll</code> không. Nếu không, chạy lại <code>Install_AutoLoadCadAddin.bat</code> với quyền Administrator và <strong>khởi động lại AutoCAD</strong>.</li>
-            <li>Nếu dùng NETLOAD thủ công: gõ lại <code>NETLOAD</code> và chọn đúng file <code>MCG_Checklist.dll</code> (tên DLL phải bắt đầu bằng <code>MCG_</code> để hệ thống nhận diện).</li>
-            <li>Nếu vẫn lỗi: mở <strong>DebugView</strong> hoặc Output window, tìm log có prefix <code>[PaletteManager]</code>, <code>[CheckListCommands]</code> để xem lỗi cụ thể.</li>
-        </ol>
+    <div class="feat-item">
+      <div class="feat-icon">✏️</div>
+      <h4>Thêm câu hỏi tùy chỉnh</h4>
+      <p>Kỹ sư có thể thêm các mục kiểm tra riêng (Custom Item) ngoài danh sách template chuẩn.</p>
     </div>
-
-    <div class="faq-question">Q2: Tôi đóng AutoCAD giữa chừng có mất dữ liệu Checklist không?</div>
-    <div class="faq-answer">
-        A: <strong>Không.</strong> Khi bạn bấm <strong>Save Draft</strong>, dữ liệu được lưu vào DBDictionary nội bộ của file DWG. Đóng AutoCAD, chuyển máy, gửi file qua email/USB — mở lại đều thấy nguyên trạng thái cũ vì dữ liệu nằm trong bản thân file <code>.dwg</code>, không phải file ngoài.
+    <div class="feat-item">
+      <div class="feat-icon">✅</div>
+      <h4>Ký duyệt &amp; Khoá</h4>
+      <p>Khi hoàn thành, bấm APPROVE để ghi nhận người duyệt + thời gian. Checklist tự động khoá để tránh sửa nhầm.</p>
     </div>
-
-    <div class="faq-question">Q3: Làm thế nào tôi biết bản vẽ nào đã được Approve?</div>
-    <div class="faq-answer">
-        A: Mở Palette bằng lệnh <code>MCG_Checklist</code>. Header <strong>DRAWING STATUS</strong> sẽ hiển thị 1 trong 2 trạng thái:
-        <ul>
-            <li><strong>APPROVED (READY FOR RELEASE)</strong> — màu xanh lá, kèm tên Windows User người duyệt và thời gian. Sẵn sàng Release lên Vault.</li>
-            <li><strong>PENDING / NOT STARTED</strong> — màu cam. Bạn cần chọn loại bản vẽ và mở Checklist để bắt đầu.</li>
-        </ul>
+    <div class="feat-item">
+      <div class="feat-icon">🔄</div>
+      <h4>Auto-save 500ms</h4>
+      <p>Mọi thao tác tick được tự động lưu sau 500ms — không bao giờ mất dữ liệu dù tắt máy đột ngột.</p>
     </div>
+  </div>
 
-    <div class="faq-question">Q4: Nếu tôi muốn sửa lại bản vẽ đã được "Sign & Approve" thì làm thế nào?</div>
-    <div class="faq-answer">
-        A: Khi bản vẽ đã Approve, checklist bị khoá để tránh chỉnh nhầm. Để mở khoá:
-        <ol>
-            <li>Bấm nút <strong>Reset / Clear Data</strong> trên Palette.</li>
-            <li>Xác nhận trong dialog "Are you sure you want to clear all QA/QC data from this drawing?".</li>
-            <li>Toàn bộ dữ liệu QA bị xoá khỏi DBDictionary, bản vẽ trở lại trạng thái <strong>PENDING</strong>.</li>
-            <li>Bạn cần làm lại checklist từ đầu trước khi Approve lại.</li>
-        </ol>
+  <div class="white-card" style="margin-top:24px;">
+    <h3>Luồng dữ liệu — Ưu tiên cache khi mở bản vẽ</h3>
+    <p style="font-size:13.5px;color:var(--muted);margin-bottom:14px;">Khi mở một bản vẽ đã từng dùng checklist, tool tìm dữ liệu cũ theo thứ tự:</p>
+    <div class="data-flow">
+      <div class="data-node primary">1️⃣ DWG file<br><span style="font-size:11px;font-weight:400;color:var(--muted);">Nhúng trong bản vẽ</span></div>
+      <div class="data-arrow">→</div>
+      <div class="data-node">2️⃣ JSON local cache<br><span style="font-size:11px;font-weight:400;color:var(--muted);">%APPDATA%\MCGCadPlugin</span></div>
+      <div class="data-arrow">→</div>
+      <div class="data-node">3️⃣ Excel template<br><span style="font-size:11px;font-weight:400;color:var(--muted);">Tải từ Vault</span></div>
+      <div class="data-arrow">→</div>
+      <div class="data-node green">Hiển thị Checklist</div>
     </div>
-
-    <div class="faq-question">Q5: Làm thế nào tôi biết bản vẽ nào là Main, bản vẽ nào là Global?</div>
-    <div class="faq-answer">
-        A: Quy định đặt tên và cấu trúc thư mục bản vẽ Main và Global được quy định bởi quy trình nội bộ của phòng Thiết kế. Checklist hiện tại chỉ yêu cầu thực hiện thủ tục bắt buộc (Release) đối với bản vẽ Main.
-    </div>
-
+    <p style="font-size:13px;color:var(--muted);margin-top:10px;">Nếu bản vẽ hoàn toàn mới (chưa từng dùng checklist) → tool hiển thị thông báo <em>"Select a drawing type above"</em> và chờ bạn chọn loại bản vẽ.</p>
+  </div>
 </div>
 
+<!-- ════════════════════════════
+     TAB 2 — QUY TRÌNH SỬ DỤNG
+════════════════════════════ -->
+<div id="workflow" class="section">
+  <h2 class="section-title">Quy trình sử dụng</h2>
+
+  <div class="steps">
+
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h3>Mở Checklist Palette</h3>
+        <p>Trong Command Line của AutoCAD, gõ lệnh:</p>
+        <div style="margin:10px 0;padding:12px 16px;background:#0d2045;border-radius:10px;font-family:'DM Mono',monospace;font-size:15px;color:#f0a500;">
+          Command: <strong>MCG_Checklist</strong>
+        </div>
+        <p>Panel <strong>MCG Tools</strong> xuất hiện ở bên phải màn hình AutoCAD. Gọi lại lệnh khi panel đang mở sẽ hiển thị lại panel (không tạo thêm panel mới).</p>
+        <div class="note-box">
+          <strong>Bản vẽ đã từng dùng Checklist?</strong> Panel tự động khôi phục đúng loại checklist và trạng thái đã tích từ lần trước — bạn không cần chọn lại loại bản vẽ.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h3>Chọn loại bản vẽ</h3>
+        <p>Nếu đây là bản vẽ mới (lần đầu dùng Checklist), panel hiển thị <em>"Select a drawing type above"</em>. Mở dropdown ở góc trên phải và chọn loại bản vẽ phù hợp:</p>
+        <ul>
+          <li><strong>Layout / Interface</strong> — bản vẽ bố trí tổng thể, giao diện</li>
+          <li><strong>Mechanical</strong> — chi tiết cơ khí</li>
+          <li><strong>Structure</strong> — kết cấu thép, panel</li>
+        </ul>
+        <p>Sau khi chọn, tool đồng bộ template Excel mới nhất từ Vault Server và tải checklist tương ứng (overlay loading xuất hiện trong vài giây).</p>
+        <p>Nếu không có Vault, có thể bấm nút <strong>...</strong> để chọn file Excel thủ công từ máy tính.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <h3>Thực hiện kiểm tra</h3>
+        <ul>
+          <li>Tick vào ô <strong>✓</strong> của từng câu hỏi khi đã kiểm tra xong.</li>
+          <li>Nếu một mục <strong>không áp dụng</strong> cho bản vẽ này → tick cột <strong>N/A</strong>.</li>
+          <li>Cả hai loại (✓ và N/A) đều được tính vào tiến độ.</li>
+          <li>Thanh <strong>Progress Bar</strong> cập nhật phần trăm hoàn thành ngay lập tức.</li>
+          <li>Dữ liệu được <strong>tự động lưu sau 500ms</strong> — không cần nhấn Save thủ công.</li>
+        </ul>
+        <div class="success-box">
+          <strong>Có thể dừng giữa chừng không?</strong> Hoàn toàn được. Đóng AutoCAD hay tắt máy bất kỳ lúc nào — mở lại bản vẽ hôm sau, tool khôi phục đúng trạng thái đã tích.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <h3>Thêm câu hỏi tùy chỉnh (Custom Item)</h3>
+        <p>Nếu checklist chuẩn chưa bao gồm một tiêu chí đặc thù cho dự án, bạn có thể thêm thủ công:</p>
+        <ol>
+          <li>Gõ nội dung câu hỏi vào ô <em>"Enter custom item content here..."</em> ở cuối panel.</li>
+          <li>Bấm nút <strong>ADD NEW</strong>.</li>
+          <li>Câu hỏi tự chọn xuất hiện ở cuối danh sách, có nút <span style="color:#dc2626;font-weight:700;">✕</span> để xóa nếu cần.</li>
+        </ol>
+        <div class="note-box">Custom Items được lưu cùng bản vẽ. Khi mở lại DWG, các câu hỏi tự chỉnh vẫn xuất hiện đầy đủ ở cuối danh sách.</div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num green">05</div>
+      <div class="step-body">
+        <h3>Ký duyệt — APPROVE</h3>
+        <p>Khi đã kiểm tra xong (hoặc đánh N/A cho các mục không áp dụng), bấm nút <strong>APPROVE</strong> màu xanh lá ở cuối panel:</p>
+        <ul>
+          <li>Nếu còn mục chưa tích → hộp thoại cảnh báo xuất hiện, xác nhận để tiếp tục.</li>
+          <li>Hệ thống tự động ghi <strong>tên Windows user</strong> và <strong>thời gian duyệt</strong> vào bản vẽ DWG.</li>
+          <li>Trạng thái chuyển sang <strong>APPROVED</strong> (màu xanh lá), toàn bộ danh sách bị khoá.</li>
+        </ul>
+        <div class="success-box">
+          Bản vẽ đã <strong>APPROVED</strong> → sẵn sàng Check-in lên Vault để xin Release!
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num gold">06</div>
+      <div class="step-body">
+        <h3>Mở lại để kiểm tra — RE-OPEN</h3>
+        <p>Bản vẽ đã Approve nhưng cần sửa lại? Bấm nút <strong>RE-OPEN</strong> màu đỏ:</p>
+        <ul>
+          <li>Trạng thái trở về <strong>PENDING</strong>, checklist được mở khoá để chỉnh sửa.</li>
+          <li>Thông tin người duyệt và thời gian bị xoá.</li>
+          <li>Các mục đã tích trước đó <strong>không bị xóa</strong> — chỉ mở khoá để bạn điều chỉnh thêm.</li>
+        </ul>
+        <p>Sau khi kiểm tra lại xong, bấm <strong>APPROVE</strong> lần 2 để chốt lại.</p>
+        <div class="danger-box">
+          Khi RE-OPEN, bản vẽ không còn ở trạng thái APPROVED — nếu đã Check-in Vault thì cần check lại sau khi Approve lần 2.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 3 — TÍNH NĂNG CHI TIẾT
+════════════════════════════ -->
+<div id="features" class="section">
+  <h2 class="section-title">Tính năng Chi tiết</h2>
+
+  <!-- Dropdown -->
+  <div class="white-card">
+    <h3>Dropdown Chọn loại bản vẽ</h3>
+    <p>Mỗi loại bản vẽ tương ứng với một file Excel template riêng được lưu trên Vault:</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:14px 0;">
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--off-white);border-radius:8px;border:1px solid var(--border);">
+        <code class="cmd" style="min-width:160px;">Layout / Interface</code>
+        <span style="font-size:13px;color:var(--muted);">→ <code style="font-family:'DM Mono',monospace;font-size:12px;">Temp Checklist - LayoutInterface.xlsx</code></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--off-white);border-radius:8px;border:1px solid var(--border);">
+        <code class="cmd" style="min-width:160px;">Mechanical</code>
+        <span style="font-size:13px;color:var(--muted);">→ <code style="font-family:'DM Mono',monospace;font-size:12px;">Temp Checklist - Mechanical.xlsx</code></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--off-white);border-radius:8px;border:1px solid var(--border);">
+        <code class="cmd" style="min-width:160px;">Structure</code>
+        <span style="font-size:13px;color:var(--muted);">→ <code style="font-family:'DM Mono',monospace;font-size:12px;">Temp Checklist - Structure.xlsx</code></span>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);">Khi chọn một loại, tool thực hiện: (1) kết nối Vault, (2) tải Excel mới nhất, (3) merge với dữ liệu đã tích trước đó (Carry-over). Tên loại bản vẽ đã chọn được ghi vào DWG để tự khôi phục lần sau.</p>
+  </div>
+
+  <!-- Sync Status -->
+  <div class="white-card">
+    <h3>Trạng thái đồng bộ Vault (Sync Status)</h3>
+    <p>Dòng nhỏ dưới tiêu đề <em>"MCG CHECKLIST"</em> hiển thị nguồn gốc file Excel đang dùng:</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
+      <div class="status-badge sync-ok" style="max-width:420px;">
+        ✓&nbsp; <strong>Vault ✔ 09:35</strong>&nbsp;— Template mới nhất tải từ Vault lúc 09:35
+      </div>
+      <div class="status-badge sync-off" style="max-width:420px;">
+        ⚠&nbsp; <strong>Vault offline — Login failed</strong>&nbsp;— Dùng file local cũ
+      </div>
+      <div class="status-badge sync-loc" style="max-width:420px;">
+        📁&nbsp; <strong>Local file</strong>&nbsp;— File Excel chọn thủ công
+      </div>
+    </div>
+    <div class="note-box" style="margin-top:14px;">Vault offline <strong>không ảnh hưởng</strong> đến checklist — tool dùng file Excel từ lần tải cuối (local cache). Bạn vẫn tick, approve bình thường.</div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="white-card">
+    <h3>Thanh Tiến độ (Progress Bar)</h3>
+    <div class="two-col">
+      <div>
+        <h4>Công thức tính %</h4>
+        <p style="font-size:13.5px;">% = (Số mục ✓ + Số mục N/A) ÷ Tổng số mục × 100</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">Cả ✓ lẫn N/A đều tính vào tiến độ hoàn thành.</p>
+      </div>
+      <div>
+        <h4>Hiển thị</h4>
+        <ul style="font-size:13.5px;">
+          <li>Thanh màu xanh <code style="background:#0078D4;color:white;padding:1px 6px;border-radius:3px;font-size:11px;">■</code> tăng theo thời gian thực.</li>
+          <li>Phần trăm hiển thị bên phải: <strong>72%</strong></li>
+          <li>Cập nhật ngay khi bạn tick hoặc bỏ tick.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto-save -->
+  <div class="white-card">
+    <h3>Auto-save Debounce 500ms</h3>
+    <p>Mỗi lần tick ô, tick N/A, thêm/xóa Custom Item — tool bắt đầu đếm ngược 500ms. Sau 500ms không có thêm thao tác nào, dữ liệu được lưu tự động vào:</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;">
+      <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;flex:1;min-width:160px;">
+        <strong style="color:var(--navy);">1. JSON local cache</strong><br>
+        <span style="color:var(--muted);font-size:12px;">%APPDATA%\MCGCadPlugin\</span>
+      </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 16px;font-size:13px;flex:1;min-width:160px;color:#15803d;">
+        <strong>2. DWG file</strong><br>
+        <span style="font-size:12px;">Nhúng vào bản vẽ đang mở</span>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px;"><strong>Debounce</strong> có nghĩa là: nếu bạn tick liên tục 10 ô trong 2 giây, hệ thống chỉ ghi đĩa 1 lần duy nhất (sau khi bạn dừng tay 500ms), không bị ghi liên tục.</p>
+  </div>
+
+  <!-- Carry-over -->
+  <div class="white-card">
+    <h3>Carry-over — Giữ tiến độ khi template Excel thay đổi</h3>
+    <p>Khi Vault cập nhật phiên bản mới của file Excel template (thêm/sửa câu hỏi), tool thực hiện <strong>merge thông minh</strong> giữa template mới và tiến độ đã tích:</p>
+    <ul style="margin-top:10px;padding-left:20px;font-size:14px;color:#4a5a78;">
+      <li>Câu hỏi nào <strong>giống nhau</strong> (trùng nội dung) → giữ nguyên trạng thái đã tích.</li>
+      <li>Câu hỏi <strong>mới thêm</strong> vào template → xuất hiện chưa tích.</li>
+      <li>Câu hỏi <strong>đã bị xoá</strong> khỏi template → không hiển thị nữa.</li>
+      <li><strong>Custom Items</strong> → luôn được giữ lại, xuất hiện ở cuối danh sách.</li>
+    </ul>
+  </div>
+
+  <!-- Approval Workflow -->
+  <div class="white-card">
+    <h3>Approval Workflow</h3>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:14px 0;">
+      <div class="data-node">PENDING<br><span style="font-size:11px;color:var(--muted);">Đang kiểm tra</span></div>
+      <div class="data-arrow">→ APPROVE →</div>
+      <div class="data-node green">APPROVED<br><span style="font-size:11px;">Đã ký duyệt</span></div>
+      <div class="data-arrow">→ RE-OPEN →</div>
+      <div class="data-node">PENDING<br><span style="font-size:11px;color:var(--muted);">Mở khoá</span></div>
+    </div>
+    <p style="font-size:13.5px;color:#4a5a78;margin-bottom:8px;"><strong>Khi APPROVE:</strong> ghi vào DWG Windows username (<code class="cmd">Environment.UserName</code>) và timestamp hiện tại. Toàn bộ checkbox và ô ADD NEW bị khoá.</p>
+    <p style="font-size:13.5px;color:#4a5a78;"><strong>Khi RE-OPEN:</strong> xoá tên người duyệt và thời gian, trả trạng thái về PENDING, mở khoá checkboxes. Các mục đã tích <strong>không bị xoá</strong>.</p>
+
+    <div style="margin-top:16px;">
+      <h4>DOCUMENT STATUS</h4>
+      <div class="status-row">
+        <div class="status-badge approved">✅ APPROVED — Nguyễn Văn A · 15/06/2025 09:42</div>
+      </div>
+      <div class="status-row">
+        <div class="status-badge pending">⏳ PENDING — Chưa hoàn thành kiểm tra</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lưu trong DWG -->
+  <div class="white-card">
+    <h3>Dữ liệu được lưu ở đâu trong file DWG?</h3>
+    <p>Tool dùng <strong>Named Object Dictionary</strong> của AutoCAD — vùng dữ liệu ẩn chuẩn của định dạng DWG, không ảnh hưởng đến hình học bản vẽ:</p>
+    <div style="background:#0f1e3a;border-radius:12px;padding:20px 24px;font-family:'DM Mono',monospace;font-size:13px;line-height:1.9;color:#c9d8f0;margin-top:14px;">
+      <div><span style="color:#6eb3fa;">DBDictionary</span> <span style="color:#f8c06b;">"MACGREGOR_QA_SYSTEM"</span></div>
+      <div style="padding-left:20px;">└── <span style="color:#6eb3fa;">XRecord</span> <span style="color:#f8c06b;">"CHECKLIST_DATA"</span></div>
+      <div style="padding-left:40px;">└── <span style="color:#91e0c8;">DxfCode.Text</span> × N chunks <span style="color:#4d6a99;">← JSON được chia nhỏ, 250 ký tự/chunk</span></div>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px;">Dữ liệu JSON của toàn bộ Checklist (danh sách câu hỏi, trạng thái tick, người duyệt...) được chia thành các đoạn 250 ký tự và lưu vào XRecord. Khi đọc lại, các đoạn được ghép lại và parse thành object.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 4 — CÀI ĐẶT
+════════════════════════════ -->
+<div id="install" class="section">
+  <h2 class="section-title">Cài đặt</h2>
+
+  <div class="steps">
+
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <h3>Copy file DLL vào thư mục nguồn</h3>
+        <p>Lấy toàn bộ file <code class="cmd">MCG_*.dll</code> (từ bản build hoặc thư mục Release do IT cung cấp) và copy vào:</p>
+        <div style="margin:10px 0;"><span class="path">C:\CustomTools\Autocad\</span></div>
+        <p>File <code class="cmd">Install_AutoLoadCadAddin.bat</code> cũng phải nằm trong thư mục này.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <h3>Chạy Batch file cài đặt</h3>
+        <p>Chuột phải vào <code class="cmd">Install_AutoLoadCadAddin.bat</code> → chọn <strong>"Run as Administrator"</strong>.</p>
+        <p>Script tự động:</p>
+        <ul>
+          <li>Tạo thư mục <span class="path">%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\Contents\</span></li>
+          <li>Copy tất cả <code class="cmd">MCG_*.dll</code> vào thư mục Contents</li>
+          <li>Tạo file <code class="cmd">PackageContents.xml</code> cho AutoCAD nhận diện plugin</li>
+        </ul>
+        <div class="danger-box">
+          Phải chạy với quyền <strong>Administrator</strong>. Nếu không, script báo lỗi <em>"Cannot create directory"</em> và thoát.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num green">03</div>
+      <div class="step-body">
+        <h3>Khởi động lại AutoCAD</h3>
+        <p>Khởi động lại AutoCAD để plugin được nạp tự động. Kiểm tra bằng cách gõ lệnh:</p>
+        <div style="margin:10px 0;padding:10px 16px;background:#0d2045;border-radius:8px;font-family:'DM Mono',monospace;font-size:14px;color:#f0a500;">
+          Command: <strong>MCG_Checklist</strong>
+        </div>
+        <p>Nếu Panel <strong>MCG Tools</strong> xuất hiện → cài đặt thành công.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Cập nhật plugin -->
+  <div class="white-card" style="margin-top:28px;">
+    <h3>Cập nhật phiên bản mới</h3>
+    <p>Khi có phiên bản plugin mới:</p>
+    <ol style="padding-left:20px;font-size:14px;color:#4a5a78;margin-top:8px;">
+      <li>Đóng AutoCAD.</li>
+      <li>Copy file DLL mới vào <span class="path">C:\CustomTools\Autocad\</span> (ghi đè file cũ).</li>
+      <li>Chạy lại <code class="cmd">Install_AutoLoadCadAddin.bat</code> với quyền Administrator.</li>
+      <li>Mở lại AutoCAD.</li>
+    </ol>
+    <div class="success-box" style="margin-top:12px;">Dữ liệu checklist trong các file DWG cũ <strong>không bị ảnh hưởng</strong> khi cập nhật plugin — dữ liệu nằm trong bản vẽ, không phải trong plugin.</div>
+  </div>
+
+  <!-- NETLOAD thủ công -->
+  <div class="white-card">
+    <h3>Nạp thủ công bằng NETLOAD (chỉ dùng để test)</h3>
+    <p>Dùng khi cần test nhanh mà không muốn cài đặt toàn bộ:</p>
+    <ol style="padding-left:20px;font-size:14px;color:#4a5a78;margin-top:8px;">
+      <li>Mở AutoCAD và mở một bản vẽ bất kỳ.</li>
+      <li>Gõ lệnh <code class="cmd">NETLOAD</code> trên Command Line.</li>
+      <li>Duyệt đến file <code class="cmd">MCG_Checklist.dll</code> và bấm <strong>Open</strong>.</li>
+      <li>Nếu có cảnh báo bảo mật → chọn <em>Always Load</em>.</li>
+      <li>Gõ <code class="cmd">MCG_Checklist</code> để mở panel.</li>
+    </ol>
+    <div class="note-box" style="margin-top:10px;">NETLOAD chỉ nạp plugin cho phiên AutoCAD đang mở. Đóng và mở lại AutoCAD thì plugin mất — phải NETLOAD lại. Dùng batch file cài đặt để plugin tự nạp mỗi lần khởi động.</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 5 — FAQ
+════════════════════════════ -->
+<div id="faq" class="section">
+  <h2 class="section-title">FAQ &amp; Khắc phục sự cố</h2>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Gõ <code class="cmd">MCG_Checklist</code> nhưng AutoCAD báo "Unknown command"?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Plugin chưa được nạp vào phiên AutoCAD này. Kiểm tra theo thứ tự:
+      <ol>
+        <li>Nếu dùng auto-load: kiểm tra thư mục <span class="path">%PROGRAMDATA%\Autodesk\ApplicationPlugins\MCG_Plugin.bundle\Contents\</span> có chứa file <code class="cmd">MCG_Checklist*.dll</code> không. Nếu không — chạy lại <code class="cmd">Install_AutoLoadCadAddin.bat</code> với quyền <strong>Administrator</strong>, sau đó <strong>khởi động lại AutoCAD</strong>.</li>
+        <li>Nếu dùng NETLOAD: gõ lại lệnh <code class="cmd">NETLOAD</code> và chọn đúng file DLL.</li>
+        <li>Vẫn lỗi: mở <strong>DebugView</strong> (Sysinternals) hoặc VS Output window, tìm log có prefix <code class="cmd">[PaletteManager]</code> để xem chi tiết lỗi.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Dropdown chọn loại bản vẽ bị mờ (disabled), không bấm được?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Dropdown bị khoá khi đang tải dữ liệu (overlay loading đang hiển thị). Hãy chờ overlay biến mất, thường dưới 10 giây khi kết nối Vault bình thường. Nếu sau 30 giây vẫn loading → kiểm tra kết nối mạng đến Vault Server. Sau khi Vault timeout, tool sẽ fallback về file local và tự mở khoá dropdown.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Mở lại file DWG nhưng checklist bắt đầu từ đầu, không thấy dữ liệu cũ?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Có thể xảy ra do một trong các nguyên nhân sau:
+      <ul>
+        <li><strong>File DWG được lưu bởi phần mềm khác</strong> (AutoCAD LT, eDrawings, trình xem DWG...) có thể strip Named Object Dictionary → dữ liệu bị mất. Luôn lưu bằng AutoCAD chính thức.</li>
+        <li><strong>Đóng AutoCAD quá nhanh</strong> sau khi tick: debounce timer 500ms chưa kịp lưu. Trong tương lai hãy chờ 1 giây sau thao tác cuối trước khi đóng.</li>
+        <li><strong>File DWG từ trước khi cài plugin</strong>: lần đầu mở bằng plugin, cần chọn lại loại bản vẽ từ dropdown. Sau đó dữ liệu được lưu và tự khôi phục từ lần sau.</li>
+      </ul>
+      Kiểm tra JSON cache tại <span class="path">%APPDATA%\MCGCadPlugin\</span> — nếu file JSON vẫn còn, tool sẽ đọc từ đó khi không tìm thấy dữ liệu trong DWG.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Tắt máy giữa chừng, liệu có mất dữ liệu checklist không?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      <strong>Rủi ro rất thấp.</strong> Auto-save debounce 500ms đảm bảo dữ liệu được lưu vào JSON cache mỗi khi bạn dừng thao tác 500ms — xảy ra trước khi lưu vào DWG. Khi mở lại, tool đọc DWG trước; nếu DWG chưa có (ví dụ chưa kịp lưu lần cuối) thì đọc từ JSON cache. Dữ liệu chỉ mất hoàn toàn nếu máy tắt trong đúng khoảnh khắc đang ghi cả DWG lẫn JSON — trường hợp cực kỳ hiếm.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Panel tự load checklist khi mở tool dù tôi chưa chọn gì?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Đây là tính năng <strong>tự động khôi phục</strong>: nếu file DWG đang mở đã có dữ liệu checklist từ trước (lưu trong Named Object Dictionary), tool tự nhận ra loại bản vẽ đã chọn và tải lại đúng checklist đó — không cần bạn chọn lại dropdown. Nếu muốn chuyển sang loại checklist khác, chọn từ dropdown — tool sẽ merge tiến độ cũ với template mới (Carry-over).
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Thông báo "Vault offline" xuất hiện — checklist có dùng được không?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      <strong>Có</strong>, vẫn dùng bình thường. Vault offline chỉ nghĩa là tool không tải được phiên bản Excel template mới nhất — tool sẽ dùng file Excel đã tải từ lần trước trong local cache. Bạn vẫn tick, approve, lưu dữ liệu hoàn toàn bình thường. Khi kết nối Vault được phục hồi, lần mở tool tiếp theo sẽ tự đồng bộ template mới nhất.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Làm thế nào biết bản vẽ nào đã được Approve hay chưa?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Mở bản vẽ trong AutoCAD → gõ lệnh <code class="cmd">MCG_Checklist</code>. Phần <strong>DOCUMENT STATUS</strong> ở cuối panel sẽ hiển thị:
+      <ul>
+        <li style="color:#16a34a;font-weight:600;">✅ APPROVED — [Tên user] · [Thời gian duyệt]</li>
+        <li style="color:#c2410c;font-weight:600;">⏳ PENDING — Chưa hoàn thành kiểm tra</li>
+      </ul>
+      Nếu bản vẽ chưa bao giờ dùng checklist → panel hiển thị "Select a drawing type above" và không có status.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Tôi muốn đổi loại checklist cho bản vẽ (ví dụ từ Structure sang Mechanical)?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Chọn lại từ dropdown — tool sẽ tải template Mechanical mới và <strong>merge (Carry-over)</strong> với những gì bạn đã tích trước đó. Các mục trùng nội dung giữa 2 template sẽ giữ trạng thái tick; các mục mới trong Mechanical sẽ hiện chưa tích. Custom Items được giữ nguyên. Tên loại mới được lưu vào DWG để tự khôi phục lần sau.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Checklist template Excel được cập nhật phiên bản mới — dữ liệu đã tích có bị mất không?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Không mất. Tính năng <strong>Carry-over</strong> tự động merge template mới với dữ liệu cũ:
+      <ul>
+        <li>Câu hỏi nào vẫn còn trong template mới → giữ nguyên trạng thái đã tích.</li>
+        <li>Câu hỏi mới thêm vào template → xuất hiện chưa tích.</li>
+        <li>Custom Items → luôn được giữ lại.</li>
+      </ul>
+      Bạn chỉ cần tích thêm các câu hỏi mới — không phải làm lại từ đầu.
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">
+      Q: Sau khi Approve, tôi có thể xem lại checklist mà không bị mở khoá không?
+      <span class="faq-chevron">▶</span>
+    </div>
+    <div class="faq-a">
+      Có. Khi bản vẽ ở trạng thái APPROVED, panel vẫn hiển thị toàn bộ danh sách câu hỏi với trạng thái tick — chỉ là các checkbox bị khoá không bấm được. Bạn có thể cuộn xem tất cả, xem tên người duyệt và thời gian duyệt ở cuối panel. Chỉ khi bấm RE-OPEN mới mở khoá để chỉnh sửa.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     TAB 6 — VAULT INTEGRATION
+════════════════════════════ -->
+<div id="vault" class="section">
+  <h2 class="section-title">Vault Integration</h2>
+
+  <!-- Hiện tại -->
+  <div class="white-card">
+    <h3>Tích hợp hiện tại — Đồng bộ Template Excel từ Vault</h3>
+    <p>Mỗi lần chọn loại bản vẽ từ dropdown, tool tự động kết nối Vault và tải file Excel template mới nhất. Quy trình:</p>
+    <div style="display:flex;flex-direction:column;gap:0;margin-top:18px;">
+
+      <div style="display:flex;gap:0;align-items:stretch;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">1</div>
+          <div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div>
+        </div>
+        <div style="padding:0 0 16px 14px;font-size:13.5px;color:#4a5a78;">
+          Đọc <code class="cmd">LoginHistory.xml</code> (<span class="path">%APPDATA%\Autodesk\VaultCommon\</span>) để lấy tên Vault Server đang dùng — không cần nhập tay.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;align-items:stretch;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">2</div>
+          <div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div>
+        </div>
+        <div style="padding:0 0 16px 14px;font-size:13.5px;color:#4a5a78;">
+          Đăng nhập Vault với <code class="cmd">AutoLoginMode = RestoreAndExecute</code> — dùng lại session Vault đang active, không hiện hộp thoại đăng nhập.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;align-items:stretch;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">3</div>
+          <div style="width:2px;flex:1;background:var(--border);margin:4px 0;"></div>
+        </div>
+        <div style="padding:0 0 16px 14px;font-size:13.5px;color:#4a5a78;">
+          Download file Excel từ đường dẫn Vault được cấu hình trong <code class="cmd">appsettings.json</code> → lưu vào Working Folder local.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;">
+        <div style="display:flex;flex-direction:column;align-items:center;width:44px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:700;">4</div>
+        </div>
+        <div style="padding:0 0 0 14px;font-size:13.5px;color:#4a5a78;">
+          Bóc tách nội dung Excel, merge với tiến độ cũ (Carry-over), hiển thị checklist.
+        </div>
+      </div>
+
+    </div>
+    <div class="note-box" style="margin-top:16px;">Nếu Vault không kết nối được, tool fallback về file Excel đã download lần trước trong local cache. Checklist vẫn hoạt động bình thường.</div>
+  </div>
+
+  <!-- Roadmap -->
+  <div class="roadmap-card">
+    <span class="roadmap-badge">ROADMAP — Chưa triển khai</span>
+    <h3 style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;">Tự động hóa 100%: Chặn Release nếu chưa Approve</h3>
+    <p style="font-size:14px;color:#4a5a78;margin-bottom:4px;">Mục tiêu dài hạn: Vault tự động <strong>từ chối</strong> chuyển bản vẽ sang trạng thái <strong>Released</strong> nếu kỹ sư chưa Approve checklist. Lộ trình triển khai gồm 4 bước:</p>
+
+    <div class="roadmap-step">
+      <div class="rs-label">BƯỚC 0 — Dev</div>
+      <h4>Thêm Bridge Drawing Property trong Add-in</h4>
+      <p>Khi user bấm Approve, add-in ghi thêm Custom Drawing Property <code class="cmd">MacGregor_QA = "APPROVED"</code> vào DWG (qua SummaryInfo hoặc DwgProperty). Vault đọc được property này. Khi RE-OPEN → xoá property này.</p>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="rs-label">BƯỚC 1 — Vault Admin</div>
+      <h4>Tạo Property trên Vault</h4>
+      <p><strong>Tools → Administration → Vault Settings → Behaviors → Properties</strong> → Tạo property <code class="cmd">QA Status</code> (loại Text).</p>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="rs-label">BƯỚC 2 — Vault Admin</div>
+      <h4>Ánh xạ từ DWG Property → Vault Property</h4>
+      <p>Tab Mapping của property: Entity = File, Provider = AutoCAD, File Property = <code class="cmd">MacGregor_QA</code>, Direction = File → Vault.</p>
+    </div>
+
+    <div class="roadmap-step">
+      <div class="rs-label">BƯỚC 3 — Vault Admin</div>
+      <h4>Thêm điều kiện vào Lifecycle</h4>
+      <p><strong>Vault Settings → Behaviors → Lifecycles</strong> → Sửa lifecycle bản vẽ Main → Transition <em>Work in Progress → Released</em> → Tab Criteria: thêm điều kiện <code class="cmd">QA Status is APPROVED</code>.</p>
+    </div>
+
+    <div class="success-box" style="margin-top:18px;">
+      <strong>Kết quả sau 4 bước:</strong> Khi người duyệt cố Release bản vẽ chưa có QA Approve, Vault hiện thông báo lỗi và từ chối — quy trình QA/QC hoàn toàn tự động, không thể bỏ qua.
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <strong>MacGregor VN</strong> — QA/QC Checklist User Guide v2.1 — AutoCAD &nbsp;|&nbsp; Internal Use Only &nbsp;|&nbsp; Cập nhật: 2026-06-16
+</footer>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const ans  = el.nextElementSibling;
+    item.classList.toggle('open');
+    ans.classList.toggle('open');
+  }
+</script>
 </body>
 </html>

@@ -4,6 +4,24 @@
 
 ---
 
+## Session 2026-06-16 (3) — UserGuide v2.0
+
+### Đã làm
+- Viết lại `Docs/Macgregor_CheckList_UserGuide.html` — v2.0:
+  - Style hiện đại giống MCGVN_Autocad_Inventor_Installation_Guide (DM Sans font, navy/red theme, card layout, sticky tab nav)
+  - 6 tab: Tổng quan · AutoCAD · Inventor · Tính năng chi tiết · FAQ · Vault Integration
+  - Bao gồm cả AutoCAD (DWG) và Inventor (IDW) trong một file duy nhất
+  - Mô tả đầy đủ: dropdown chọn loại bản vẽ, progress bar, auto-save 500ms, carry-over, custom items, approve/re-open, sync status
+  - FAQ accordion 10 câu (5 AutoCAD + 5 Inventor)
+  - Vault Integration roadmap 4 bước
+  - So sánh bảng AutoCAD vs Inventor
+  - Data flow diagram ưu tiên cache
+
+### Trạng thái
+- File: `Docs/Macgregor_CheckList_UserGuide.html` ✅ hoàn thành
+
+---
+
 ## Session 2026-06-16 (2) — Checklist restore theo bản vẽ + bỏ auto-load
 
 ### Đã làm
