@@ -18,7 +18,7 @@
 
   <!-- Release: MCG_ prefix theo chuẩn MCGVN Installation Guide (DLL phải tên MCG_*.dll) -->
   <PropertyGroup Condition="'$(Configuration)' != 'Debug'">
-    <AssemblyName>MCG_CadPlugin</AssemblyName>
+    <AssemblyName>MCG_CheckList</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -71,7 +71,7 @@
   <!-- Deploy DLL + sinh PackageContents.xml theo chuẩn MCGVN sau mỗi lần build -->
   <Target Name="DeployToBundle" AfterTargets="Build">
     <PropertyGroup>
-      <BundleRoot>$(PROGRAMDATA)\Autodesk\ApplicationPlugins\MCG_CadPlugin.bundle</BundleRoot>
+      <BundleRoot>$(PROGRAMDATA)\Autodesk\ApplicationPlugins\MCG_CheckList.bundle</BundleRoot>
       <BundleContents>$(BundleRoot)\Contents</BundleContents>
     </PropertyGroup>
 
@@ -80,7 +80,7 @@
 
     <!-- Xóa DLL cũ (MCGCadPlugin* và MCG_CadPlugin*) — ContinueOnError khi AutoCAD đang chạy -->
     <ItemGroup>
-      <OldDlls Include="$(BundleContents)\MCGCadPlugin*.dll;$(BundleContents)\MCG_CadPlugin*.dll" />
+      <OldDlls Include="$(BundleContents)\MCGCadPlugin*.dll;$(BundleContents)\MCG_CadPlugin*.dll;$(BundleContents)\MCG_CheckList*.dll" />
     </ItemGroup>
     <Delete Files="@(OldDlls)" ContinueOnError="true" />
 
@@ -91,10 +91,10 @@
     <!-- Note: %3F = '?' và %2A = '*' — escape wildcard để MSBuild không glob expand các item này -->
     <ItemGroup>
       <PkgXmlLine Include='&lt;%3Fxml version="1.0" encoding="utf-8"%3F&gt;' />
-      <PkgXmlLine Include='&lt;ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Author="MCG Team" Name="MCG_CadPlugin"&gt;' />
+      <PkgXmlLine Include='&lt;ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Author="MCG Team" Name="MCG_CheckList"&gt;' />
       <PkgXmlLine Include='&lt;Components&gt;' />
       <PkgXmlLine Include='&lt;RuntimeRequirements OS="Win64" Platform="AutoCAD%2A" SeriesMin="R24.0" /&gt;' />
-      <PkgXmlLine Include='&lt;ComponentEntry AppName="MCG_CadPlugin" Version="1.0.0" ModuleName="./Contents/$(AssemblyName).dll" LoadOnAutoCADStartup="True" /&gt;' />
+      <PkgXmlLine Include='&lt;ComponentEntry AppName="MCG_CheckList" Version="1.0.0" ModuleName="./Contents/$(AssemblyName).dll" LoadOnAutoCADStartup="True" /&gt;' />
       <PkgXmlLine Include='&lt;/Components&gt;' />
       <PkgXmlLine Include='&lt;/ApplicationPackage&gt;' />
     </ItemGroup>

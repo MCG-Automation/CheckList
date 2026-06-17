@@ -363,7 +363,7 @@ namespace MCGCadPlugin.Views.CheckList
                               $"The file was not found locally and no embedded fallback exists.\n\n" +
                               $"Solutions:\n" +
                               $"1. Connect to Vault (auto-sync on next open)\n" +
-                              $"2. Manually copy the Excel file to:\n   {settings.LastExcelFolder}\n" +
+                              $"2. Manually copy the Excel file to:\n   {MCGCadPlugin.Services.CheckList.ChecklistAppDataPaths.SharedTemplatePath}\n" +
                               $"3. (Dev) Add the Excel file to the project Resources/ folder and rebuild";
                 }
                 else

@@ -56,6 +56,12 @@ namespace MCGCadPlugin.Services.CheckList
                     targetLocalPath = syncResult.LocalPath;
                     Debug.WriteLine($"{LOG_PREFIX} Vault sync: SyncedFromVault={syncResult.SyncedFromVault}, Path={targetLocalPath}");
                 }
+                else if (!Path.IsPathRooted(filePathOrName))
+                {
+                    // Khi không dùng Vault và chỉ có tên file, resolve về thư mục template dùng chung
+                    targetLocalPath = Path.Combine(ChecklistAppDataPaths.GetDefaultDesignPath(), filePathOrName);
+                    Debug.WriteLine($"{LOG_PREFIX} Non-Vault mode, resolved path: {targetLocalPath}");
+                }
 
                 // 2. Phân tích tệp Excel tại đường dẫn cục bộ đích để lấy Metadata và danh sách câu hỏi mẫu mới nhất
                 // Lưu ý: _excelParser.Parse đã tích hợp sẵn cơ chế Fallback (giải nén từ Resource) nếu không tìm thấy file

@@ -23,16 +23,21 @@ namespace MCGCadPlugin.Services.CheckList
         }
 
         /// <summary>
-        /// Trả về đường dẫn làm việc mặc định trên server CAS (không hardcode user)
+        /// Đường dẫn thư mục dùng chung chứa file Excel template — cố định cho mọi user trên mạng CAS.
+        /// </summary>
+        public static readonly string SharedTemplatePath = @"C:\MacGregor_CAS_WF\Designs\90 Users\truonph";
+
+        /// <summary>
+        /// Trả về đường dẫn thư mục chứa Excel template dùng chung (cố định, không theo tên user).
         /// </summary>
         public static string GetDefaultDesignPath()
         {
-            string baseDir = @"C:\MacGregor_CAS_WF\Designs\90 Users";
-            string userDir = Environment.UserName;
-            string fullPath = Path.Combine(baseDir, userDir);
-            
-            if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
-            return fullPath;
+            if (!Directory.Exists(SharedTemplatePath))
+            {
+                try { Directory.CreateDirectory(SharedTemplatePath); }
+                catch { /* không tạo được thì để parser tự xử lý */ }
+            }
+            return SharedTemplatePath;
         }
 
         public static string SettingsFile => Path.Combine(Root, "settings.json");
