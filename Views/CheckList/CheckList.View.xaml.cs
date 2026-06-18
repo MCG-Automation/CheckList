@@ -167,6 +167,11 @@ namespace MCGCadPlugin.Views.CheckList
             // Cài đặt textbox placeholder ban đầu
             ResetTextBoxPlaceholder();
 
+            // Lắng nghe sự kiện chuyển đổi bản vẽ — reset trạng thái khi user mở/chuyển DWG
+            Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.DocumentActivated += OnDocumentActivated;
+            Unloaded += (s, e) =>
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.DocumentActivated -= OnDocumentActivated;
+
             // Tự động tải Excel dựa trên bộ môn đang được chọn mặc định trong ComboBox
             TriggerInitialSelection();
 
@@ -175,6 +180,48 @@ namespace MCGCadPlugin.Views.CheckList
         #endregion
 
         #region Method: Trigger Initial Selection
+        /// <summary>
+        /// Kích hoạt khi AutoCAD chuyển sang bản vẽ khác (mở mới hoặc switch tab).
+        /// Reset toàn bộ trạng thái UI rồi load lại Checklist theo bản vẽ đang active.
+        /// </summary>
+        private void OnDocumentActivated(object sender,
+            Autodesk.AutoCAD.ApplicationServices.DocumentCollectionEventArgs e)
+        {
+            // Phải dispatch về UI thread vì event này đến từ AutoCAD thread
+            Dispatcher.Invoke(() =>
+            {
+                Debug.WriteLine($"{LOG_PREFIX} Bản vẽ được kích hoạt: '{e.Document?.Name}' — Làm mới Checklist.");
+                ResetViewState();
+                TriggerInitialSelection();
+            });
+        }
+
+        /// <summary>
+        /// Xoá toàn bộ trạng thái hiện tại của View về empty-state trước khi load bản vẽ mới.
+        /// </summary>
+        private void ResetViewState()
+        {
+            _debounceSaveTimer.Stop();
+
+            if (ChecklistItems != null)
+            {
+                foreach (var item in ChecklistItems)
+                    item.PropertyChanged -= Item_PropertyChanged;
+            }
+
+            // Reset ComboBox mà không trigger SelectionChanged
+            _suppressSelectionChanged = true;
+            CboDiscipline.SelectedItem = null;
+            _suppressSelectionChanged = false;
+
+            ChecklistItems = null;
+            Document = null;
+            SyncStatusText = string.Empty;
+            SyncStatusColor = Brushes.Gray;
+
+            Debug.WriteLine($"{LOG_PREFIX} ResetViewState hoàn tất.");
+        }
+
         /// <summary>
         /// Khôi phục checklist từ bản vẽ DWG nếu bản vẽ đã có dữ liệu từ phiên trước.
         /// Nếu bản vẽ mới (chưa có data): không load gì cả, chờ user chọn loại bản vẽ.

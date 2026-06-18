@@ -71,7 +71,7 @@
   <!-- Deploy DLL + sinh PackageContents.xml theo chuẩn MCGVN sau mỗi lần build -->
   <Target Name="DeployToBundle" AfterTargets="Build">
     <PropertyGroup>
-      <BundleRoot>$(PROGRAMDATA)\Autodesk\ApplicationPlugins\MCG_CheckList.bundle</BundleRoot>
+      <BundleRoot>$(PROGRAMDATA)\Autodesk\ApplicationPlugins\MCG_Plugin.bundle</BundleRoot>
       <BundleContents>$(BundleRoot)\Contents</BundleContents>
     </PropertyGroup>
 

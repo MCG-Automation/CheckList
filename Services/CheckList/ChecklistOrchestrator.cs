@@ -68,19 +68,15 @@ namespace MCGCadPlugin.Services.CheckList
                 // nên không cần kiểm tra File.Exists tại đây để tránh ngăn cản logic dự phòng.
                 var newDoc = _excelParser.Parse(targetLocalPath);
 
-                // 3. Xác định nguồn cache: DWG được ưu tiên vì đi theo file bản vẽ (portable hơn JSON local)
-                //    Nếu không có DWG preload thì fallback về JSON cache trên máy hiện tại.
+                // 3. Nguồn carry-over DUY NHẤT là DWG XRecord — dữ liệu gắn với chính bản vẽ đó.
+                //    JSON cache KHÔNG được dùng: cache key chỉ theo (ProjectNo, PanelName, Discipline)
+                //    nên mọi bản vẽ cùng loại checklist dùng chung 1 entry → ticks của bản vẽ cũ
+                //    sẽ bị carry-over sang bản vẽ mới hoàn toàn không liên quan.
                 ChecklistDocument effectiveCache = dwgPreload;
                 if (effectiveCache != null)
-                {
-                    Debug.WriteLine($"{LOG_PREFIX} Sử dụng dữ liệu DWG làm nguồn Carry-over cho Panel '{newDoc.PanelName}'.");
-                }
+                    Debug.WriteLine($"{LOG_PREFIX} Dùng DWG XRecord làm nguồn Carry-over cho '{newDoc.PanelName}'.");
                 else
-                {
-                    effectiveCache = _cacheRepository.LoadChecklist(newDoc.ProjectNo, newDoc.PanelName, newDoc.Discipline);
-                    if (effectiveCache != null)
-                        Debug.WriteLine($"{LOG_PREFIX} Không có DWG cache, dùng JSON cache cho Panel '{newDoc.PanelName}'.");
-                }
+                    Debug.WriteLine($"{LOG_PREFIX} Bản vẽ mới (không có DWG XRecord) — bắt đầu fresh từ Excel template.");
 
                 if (effectiveCache != null)
                 {
@@ -88,10 +84,14 @@ namespace MCGCadPlugin.Services.CheckList
                     var mergedItems = MergeChecklistItems(newDoc.Items, effectiveCache.Items);
                     newDoc.Items = mergedItems;
 
-                    // Kế thừa trạng thái phê duyệt (Approval workflow)
-                    newDoc.Status = effectiveCache.Status;
-                    newDoc.ApprovedBy = effectiveCache.ApprovedBy;
-                    newDoc.ApprovedDate = effectiveCache.ApprovedDate;
+                    // Kế thừa trạng thái phê duyệt CHỈ từ DWG — approval gắn liền với bản vẽ cụ thể.
+                    // JSON cache KHÔNG được mang approval sang bản vẽ khác dù cùng loại checklist.
+                    if (dwgPreload != null)
+                    {
+                        newDoc.Status = effectiveCache.Status;
+                        newDoc.ApprovedBy = effectiveCache.ApprovedBy;
+                        newDoc.ApprovedDate = effectiveCache.ApprovedDate;
+                    }
                 }
                 else
                 {

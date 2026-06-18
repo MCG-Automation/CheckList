@@ -4,6 +4,54 @@
 
 ---
 
+## Session 2026-06-18 (2) — Feature: N/A checkbox cho tất cả checklist items
+
+### Đã làm
+- [Views/CheckList/CheckList.View.xaml](Views/CheckList/CheckList.View.xaml):
+  - **Check column**: thêm `CheckBox.Style` với `DataTrigger(IsNotApplicable=True)` → `IsEnabled=False`, `Opacity=0.25`
+  - **Content column**: thêm `TextBlock.Style` với `DataTrigger(IsNotApplicable=True)` → `Opacity=0.35`, `TextDecorations=Strikethrough`
+  - **N/A column**: xóa `Visibility="{Binding IsCustom, Converter=...}"` — giờ hiện N/A cho tất cả items (cả standard và custom)
+- [C:\Users\truonph\Desktop\MCG\Inventor\MCG_CheckListInventor\Views\CheckList\CheckList.View.xaml]: apply đúng 3 thay đổi trên
+- [Models/CheckList/CheckList.Models.cs](Models/CheckList/CheckList.Models.cs): sửa comment `IsNotApplicable` — bỏ ghi chú sai "Chỉ có ý nghĩa khi IsCustom = true"
+
+### Hành vi sau khi fix
+- Tick N/A vào bất kỳ dòng nào → ô Check bị mờ (opacity 0.25) + disabled
+- Tick N/A → nội dung bị mờ (opacity 0.35) + gạch ngang (Strikethrough)
+- Mutual exclusion vẫn hoạt động: check thì bỏ N/A, bật N/A thì bỏ check (logic trong model)
+
+### Trạng thái
+- Phase: tính năng N/A hoàn chỉnh cho cả AutoCAD và Inventor
+- Cần build và test thực tế
+
+### Bước tiếp theo
+- Build Debug và kiểm tra UI trong AutoCAD: tick N/A xem mờ đúng không
+- Build Inventor plugin và kiểm tra tương tự
+
+---
+
+## Session 2026-06-18 — Fix: Approval status không bị carry-over từ JSON cache sang bản vẽ mới
+
+### Đã làm
+- [Services/CheckList/ChecklistOrchestrator.cs](Services/CheckList/ChecklistOrchestrator.cs):
+  - **Root cause**: Approval status (`Status`, `ApprovedBy`, `ApprovedDate`) bị kế thừa từ JSON cache.
+    JSON cache được key theo `ProjectNo + PanelName + Discipline` — 2 bản vẽ dùng cùng loại checklist (Interface)
+    sẽ khớp cùng cache entry → bản vẽ mới nhận `Status = "APPROVED"` từ bản vẽ cũ.
+  - **Fix**: Approval chỉ được kế thừa khi `dwgPreload != null` (nguồn là DWG của chính bản vẽ đó).
+    JSON cache chỉ carry-over dấu tích, không carry-over trạng thái approve.
+
+- [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs) *(session trước)*:
+  - Subscribe `DocumentManager.DocumentActivated` → reset UI + reload khi chuyển bản vẽ.
+
+### Hành vi sau khi fix
+- Bản vẽ A (Interface APPROVED) → Mở bản vẽ B → Chọn Interface: Status = **PENDING** ✅
+- Mở lại bản vẽ A: Status vẫn **APPROVED** ✅ (đọc từ DWG XRecord)
+- Dấu tích vẫn được carry-over từ JSON cache ✅
+
+### Trạng thái
+- Build: **PASS** (0 errors, 0 warnings)
+
+---
+
 ## Session 2026-06-16 (3) — UserGuide v2.0
 
 ### Đã làm

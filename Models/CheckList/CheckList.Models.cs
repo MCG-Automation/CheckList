@@ -50,7 +50,7 @@ namespace MCGCadPlugin.Models.CheckList
             }
         }
 
-        /// <summary>True = Kỹ sư tự thêm (cho xóa + cho N/A) | False = Mặc định (Khóa)</summary>
+        /// <summary>True = Kỹ sư tự thêm (có thể xóa) | False = Câu hỏi chuẩn từ Excel</summary>
         public bool IsCustom
         {
             get => _isCustom;
@@ -59,7 +59,7 @@ namespace MCGCadPlugin.Models.CheckList
 
         /// <summary>
         /// True = Không áp dụng cho bản vẽ này (bỏ qua yêu cầu hoàn thành).
-        /// Chỉ có ý nghĩa khi IsCustom = true. Fixed items không được phép N/A.
+        /// Áp dụng cho cả standard items và custom items.
         /// </summary>
         public bool IsNotApplicable
         {

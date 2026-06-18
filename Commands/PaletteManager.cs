@@ -114,11 +114,17 @@ namespace MCGCadPlugin.Commands
             _paletteSet.AddVisual("CheckList", new QaChecklistView());
 
             // 3. Thiết lập thuộc tính — SAU AddVisual
-            _paletteSet.DockEnabled = DockSides.Right | DockSides.Left;
+            // Chỉ cho phép dock phải — ngăn palette xuất hiện ở left hoặc trạng thái float mặc định
+            _paletteSet.DockEnabled = DockSides.Right;
             _paletteSet.Size = new Size(400, 600);
             _paletteSet.Style = PaletteSetStyles.ShowTabForSingle
                               | PaletteSetStyles.Snappable;
             _paletteSet.KeepFocus = true;
+
+            // 4. Override GUID session restore — AutoCAD tự động set Visible=true cho PaletteSet
+            //    nếu session trước palette đang mở. Phải force false ở đây để palette chỉ
+            //    xuất hiện khi user gõ lệnh, không auto-show khi AutoCAD khởi động.
+            _paletteSet.Visible = false;
 
             Debug.WriteLine($"{LOG_PREFIX} PaletteSet khởi tạo THÀNH CÔNG — 1 tab đã đăng ký.");
         }
