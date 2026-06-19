@@ -129,7 +129,7 @@
   - `LogInResult.ErrorMessages` được join và ném vào exception message để thấy lý do thất bại.
   - Wrap `LogOut` trong try-catch để tránh ẩn lỗi từ bước download.
 - [Services/CheckList/ExcelChecklistParser.cs](Services/CheckList/ExcelChecklistParser.cs):
-  - `ExtractDefaultTemplate`: bỏ hardcode `"MCGCadPlugin.Resources.DefaultChecklist.xlsx"`, thay bằng `EndsWith(fileName)` tìm resource khớp tên file thực (per-discipline).
+  - `ExtractDefaultTemplate`: bỏ hardcode `"MCG_CheckList.Resources.DefaultChecklist.xlsx"`, thay bằng `EndsWith(fileName)` tìm resource khớp tên file thực (per-discipline).
   - Log danh sách tất cả embedded resources khi không tìm thấy.
 - [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs):
   - Lỗi `FileNotFoundException` từ parser: hiển thị message rõ ràng với đường dẫn cần copy file + 3 giải pháp.
@@ -151,7 +151,7 @@
 ### Ghi chú API
 - **Vault SDK `LogIn` server format**: hostname thuần (`VNHPH1-S0006`), không có `http://`. URL prefix khiến login fail âm thầm.
 - **`IVaultConnectionManagerService.GetActiveConnections()`**: không tồn tại trong Vault 2023 SDK — không thể tái dùng connection từ process khác (Vault Explorer).
-- **Embedded resource suffix match**: `assembly.GetManifestResourceNames()` trả tên đầy đủ như `MCGCadPlugin.Resources.Temp Checklist - Structure.xlsx`. Dùng `EndsWith(fileName)` thay vì equals để tránh sai prefix.
+- **Embedded resource suffix match**: `assembly.GetManifestResourceNames()` trả tên đầy đủ như `MCG_CheckList.Resources.Temp Checklist - Structure.xlsx`. Dùng `EndsWith(fileName)` thay vì equals để tránh sai prefix.
 
 ---
 
@@ -187,7 +187,7 @@
 ### Đã làm
 [Docs/Macgregor_CheckList_UserGuide.html](Docs/Macgregor_CheckList_UserGuide.html) — 5 chỗ sửa:
 1. **Intro paragraph** ([line 115]): bỏ "và Autodesk Inventor" (plugin chỉ AutoCAD), thêm note "Phiên bản Inventor: roadmap".
-2. **Section 1 — Cài đặt** ([line 121-130]): tách thành 2 cách: (1) Auto-load qua `Install_AutoLoadCadAddin.bat` (khuyến nghị), (2) NETLOAD thủ công cho test/debug. Đổi `MCGCadPlugin.dll` → `MCG_Checklist.dll`. Đổi command ví dụ `MCG_Fitting` → `MCG_Checklist`.
+2. **Section 1 — Cài đặt** ([line 121-130]): tách thành 2 cách: (1) Auto-load qua `Install_AutoLoadCadAddin.bat` (khuyến nghị), (2) NETLOAD thủ công cho test/debug. Đổi `MCG_CheckList.dll` → `MCG_Checklist.dll`. Đổi command ví dụ `MCG_Fitting` → `MCG_Checklist`.
 3. **Section 2 Bước 3 — Sign & Approve**: button label `SIGN & APPROVE DRAWING` → `SIGN & APPROVE`. **Xoá** mention về stamp "CheckList Passed" trên layer Defpoints (tính năng đã gỡ ở session 2026-05-04 (2)). Thay bằng mô tả trạng thái thực tế: MessageBox confirmation + header `APPROVED (READY FOR RELEASE)` trên Palette.
 4. **Section 3 — Vault integration**: thêm badge `ROADMAP — CHƯA TRIỂN KHAI` + warning box giải thích trạng thái hiện tại (DBDictionary nội bộ Vault không đọc được). Bổ sung **Bước 0** (Dev): viết bridge property `MacGregor_QA` vào `Database.SummaryInfo`/`DwgProperty` khi Approve để Vault map qua tên đó. 4 bước thay vì 3.
 5. **Section 4 — FAQ rewrite hoàn toàn**: xoá Q về Inventor + Q về "Auto-Purge stamp giả mạo" (tính năng đã gỡ). Thay bằng 5 Q mới khớp UI hiện tại:
@@ -215,9 +215,9 @@
 ## Session 2026-05-07 — Align convention naming + bundle path với HTML guide deploy
 
 ### Đã làm
-- [MCGCadPlugin.csproj](MCGCadPlugin.csproj): `<PluginName>MCGCadPlugin.CheckList</PluginName>` → `<PluginName>MCG_Checklist</PluginName>`. DLL output đổi thành `MCG_Checklist.dll` (Release) / `MCG_Checklist_<timestamp>.dll` (Debug). Khớp wildcard `MCG_*.dll` mà bat trong HTML guide quét.
+- [MCG_CheckList.csproj](MCG_CheckList.csproj): `<PluginName>MCG_CheckList.CheckList</PluginName>` → `<PluginName>MCG_Checklist</PluginName>`. DLL output đổi thành `MCG_Checklist.dll` (Release) / `MCG_Checklist_<timestamp>.dll` (Debug). Khớp wildcard `MCG_*.dll` mà bat trong HTML guide quét.
 - [CLAUDE.md](CLAUDE.md) mục 2: `Bundle folder: %APPDATA%\Autodesk\ApplicationPlugins\` → `%PROGRAMDATA%\Autodesk\ApplicationPlugins\`. Khớp với bat shared `Install_AutoLoadCadAddin.bat` (HTML guide) — All Users, gộp tất cả `MCG_*.dll` vào 1 bundle `MCG_Plugin.bundle`.
-- [Commands/PaletteManager.cs](Commands/PaletteManager.cs): PaletteSet title `"MCGCadPlugin - CheckList"` → `"MCG Checklist"`.
+- [Commands/PaletteManager.cs](Commands/PaletteManager.cs): PaletteSet title `"MCG_CheckList - CheckList"` → `"MCG Checklist"`.
 - Build: `dotnet build -c Debug` → 0 warnings, 0 errors. DLL output: `MCG_Checklist_20260507_142632.dll`.
 
 ### Trạng thái
@@ -227,15 +227,15 @@
   - PaletteSet title: `MCG <Module>` (vd: `"MCG Checklist"`).
   - Lệnh CAD: `MCG_<Module>` (đã có: `MCG_Checklist`).
   - Bundle: gộp **shared bundle** `MCG_Plugin.bundle` ở `%PROGRAMDATA%\Autodesk\ApplicationPlugins\` (Option Y — bat shared scan toàn bộ `MCG_*.dll` trên drive, do team Dev đồng bộ).
-  - C# namespace giữ nguyên `MCGCadPlugin.<Layer>.<Module>` (theo CLAUDE.md mục 3) — namespace là cấu trúc code, độc lập với DLL filename.
+  - C# namespace giữ nguyên `MCG_CheckList.<Layer>.<Module>` (theo CLAUDE.md mục 3) — namespace là cấu trúc code, độc lập với DLL filename.
 
 ### Bước tiếp theo
 - User test: đóng AutoCAD, build lại, copy `MCG_Checklist*.dll` vào `C:\CustomTools\Autocad\`, chạy `Install_AutoLoadCadAddin.bat` (Run as Admin). Mở AutoCAD → kiểm tra autoload, gõ `MCG_Checklist` → Palette title hiển thị `"MCG Checklist"`.
-- Bundle cũ `MCGCadPlugin.CheckList.bundle` (nếu đã từng deploy) cần xoá tay ở `%PROGRAMDATA%\Autodesk\ApplicationPlugins\` để tránh load song song hai version.
+- Bundle cũ `MCG_CheckList.CheckList.bundle` (nếu đã từng deploy) cần xoá tay ở `%PROGRAMDATA%\Autodesk\ApplicationPlugins\` để tránh load song song hai version.
 
 ### Ghi chú API
 - HTML guide `MCGVN_Autocad_Inventor_Installation_Guide.html` **không sửa** — đây là guide generic cho team Dev (1 bat shared cho tất cả MCG plugin). Plugin phải align convention vào guide, không ngược lại.
-- `<PluginName>` trong csproj điều khiển `<AssemblyName>` (qua condition Debug/Release ở [csproj:16-17](MCGCadPlugin.csproj#L16-L17)) — đổi 1 chỗ, kéo theo DLL filename + bundle scan + load dynamic.
+- `<PluginName>` trong csproj điều khiển `<AssemblyName>` (qua condition Debug/Release ở [csproj:16-17](MCG_CheckList.csproj#L16-L17)) — đổi 1 chỗ, kéo theo DLL filename + bundle scan + load dynamic.
 - Khi đổi PaletteSet title nhưng GUID giữ nguyên (`7b3e9a2c-...`) → AutoCAD vẫn nhớ vị trí dock cũ; chỉ tên hiển thị thay đổi.
 
 ---
@@ -265,7 +265,7 @@
 ## Session 2026-05-04 (3) — Fix 4 build warnings
 
 ### Đã làm
-[MCGCadPlugin.csproj](MCGCadPlugin.csproj):
+[MCG_CheckList.csproj](MCG_CheckList.csproj):
 - **Fix Fody warning**: Xoá `<IncludeAssets>` trong `PackageReference Costura.Fody` (giữ `<PrivateAssets>all</PrivateAssets>`). Theo khuyến nghị chính thức của Fody.
 - **Fix MSB3073 (PowerShell exit 9009)**: Xoá hẳn `<Target Name="UpdatePackageContents">` (cũ, lines 25-49). Lý do: file `PackageContents.xml` không tồn tại trong repo → target dead code; multi-line PS Exec command gây cmd.exe parse fail.
 - **Hạ MSB3061 (DLL bị AutoCAD khoá)**: Thêm `<MSBuildWarningsAsMessages>MSB3061</MSBuildWarningsAsMessages>`. Build mới dùng timestamp filename nên không thực sự bị block — đây chỉ là noise khi MSBuild cố cleanup DLL cũ. Hạ thành message.
@@ -334,8 +334,8 @@
 ## Session 2026-04-21 (4) — Rename plugin (CheckList)
 
 ### Đã làm
-- [MCGCadPlugin.csproj](MCGCadPlugin.csproj): `<PluginName>MCGCadPlugin</PluginName>` → `<PluginName>MCGCadPlugin.CheckList</PluginName>` → DLL output đổi thành `MCGCadPlugin.CheckList_<timestamp>.dll`.
-- [Commands/PaletteManager.cs](Commands/PaletteManager.cs): PaletteSet title `"MCG Plugins"` → `"MCGCadPlugin - CheckList"`.
+- [MCG_CheckList.csproj](MCG_CheckList.csproj): `<PluginName>MCG_CheckList</PluginName>` → `<PluginName>MCG_CheckList.CheckList</PluginName>` → DLL output đổi thành `MCG_CheckList.CheckList_<timestamp>.dll`.
+- [Commands/PaletteManager.cs](Commands/PaletteManager.cs): PaletteSet title `"MCG Plugins"` → `"MCG_CheckList - CheckList"`.
 - [CLAUDE.md](CLAUDE.md): nới rule §2 (hạn chế chứ không cấm tuyệt đối sửa csproj khi có lý do rõ ràng).
 
 ### Trạng thái
@@ -343,7 +343,7 @@
 - **Command names:** đã đổi ở session trước (`MCG_Checklist_Show` / `MCG_Checklist_Hide`) — không đổi lần này.
 
 ### Bước tiếp theo
-- Test: gõ `MCG_Checklist_Show` / `MCG_Checklist_Hide` trong AutoCAD, xác nhận title `"MCGCadPlugin - CheckList"` và DLL mới `MCGCadPlugin.CheckList_*.dll`.
+- Test: gõ `MCG_Checklist_Show` / `MCG_Checklist_Hide` trong AutoCAD, xác nhận title `"MCG_CheckList - CheckList"` và DLL mới `MCG_CheckList.CheckList_*.dll`.
 - Load song song với plugin FittingManagement — phải thấy 2 PaletteSet riêng biệt.
 
 ### Ghi chú API
@@ -405,7 +405,7 @@
 ### Files giữ nguyên
 - `CheckList` (Models/Services/Views) — không có Commands, không có Utilities.
 - `FittingManagement` (Commands/Models/Services/Views/Utilities).
-- `Commands/PaletteManager.cs` (sửa), `Utilities/FileLogger.cs` (shared), `Docs/`, `Resources/`, `MCGCadPlugin.csproj` (không sửa — SDK-style tự include theo thư mục).
+- `Commands/PaletteManager.cs` (sửa), `Utilities/FileLogger.cs` (shared), `Docs/`, `Resources/`, `MCG_CheckList.csproj` (không sửa — SDK-style tự include theo thư mục).
 
 ### Trạng thái
 - **Phase:** 1 — Feature Implementation (scope giới hạn lại còn 2 module).
@@ -468,7 +468,7 @@
 ### Đã làm
 - Thêm nút `BtnClosePalette` (ký tự `X`, 24×24) ở **góc trên phải** của [Views/CheckList/CheckList.View.xaml](Views/CheckList/CheckList.View.xaml) — `Grid.Row=0`, `HorizontalAlignment=Right`.
 - Shift các row hiện có xuống: Status GroupBox → Row 1, action buttons → Row 2, `PanelChecklist` → Row 3. Tổng grid nay 4 rows (`Auto, Auto, Auto, *`).
-- Thêm handler `BtnClosePalette_Click` trong [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs) gọi `PaletteManager.Instance.Hide()` (import thêm `MCGCadPlugin.Commands`).
+- Thêm handler `BtnClosePalette_Click` trong [Views/CheckList/CheckList.View.xaml.cs](Views/CheckList/CheckList.View.xaml.cs) gọi `PaletteManager.Instance.Hide()` (import thêm `MCG_CheckList.Commands`).
 
 ### Trạng thái
 - **Phase:** 1 — Feature Implementation (Checklist module).
@@ -599,7 +599,7 @@
 
 **Fix toàn bộ build errors (4 root causes):**
 
-1. **Fix x:Class namespace trong 5 XAML files** — `ShipAutoCadPlugin.UI.*` → `MCGCadPlugin.Views.FittingManagement.*`:
+1. **Fix x:Class namespace trong 5 XAML files** — `ShipAutoCadPlugin.UI.*` → `MCG_CheckList.Views.FittingManagement.*`:
    - `Views/FittingManagement/BOM/BomPreviewWindow.xaml`
    - `Views/FittingManagement/Library/FittingLibraryWindow.xaml`
    - `Views/FittingManagement/Library/Accessory/AccessoryManagerWindow.xaml`
@@ -629,7 +629,7 @@
 
 ### Ghi chú API
 
-- **x:Class phải khớp namespace code-behind** — nếu XAML dùng `ShipAutoCadPlugin.UI.X` mà code-behind dùng `MCGCadPlugin.Views.Y.X` thì WPF không generate partial class, gây lỗi `InitializeComponent` và tất cả control names
+- **x:Class phải khớp namespace code-behind** — nếu XAML dùng `ShipAutoCadPlugin.UI.X` mà code-behind dùng `MCG_CheckList.Views.Y.X` thì WPF không generate partial class, gây lỗi `InitializeComponent` và tất cả control names
 - **`Autodesk.AutoCAD.Runtime.Exception` xung đột với `System.Exception`** — khi `using Autodesk.AutoCAD.Runtime`, cần disambiguate bằng `using Exception = System.Exception;`
 - **`PaletteSet.RecalculateSize` không có trong AutoCAD 2023 .NET API** — property này không tồn tại, xóa bỏ
 

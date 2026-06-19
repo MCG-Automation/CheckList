@@ -3,10 +3,10 @@ using System.Text;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
-using MCGCadPlugin.Models.CheckList;
+using MCG_CheckList.Models.CheckList;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     public partial class AutoCadService : IAutoCadChecklistService
     {

@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Drawing;
 using Autodesk.AutoCAD.Windows;
 using Exception = System.Exception;
-using MCGCadPlugin.Views.CheckList;
+using MCG_CheckList.Views.CheckList;
 
-namespace MCGCadPlugin.Commands
+namespace MCG_CheckList.Commands
 {
     /// <summary>
     /// Quản lý PaletteSet duy nhất của toàn plugin — Singleton.

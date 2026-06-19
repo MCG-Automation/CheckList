@@ -1,6 +1,6 @@
-using MCGCadPlugin.Models.CheckList;
+using MCG_CheckList.Models.CheckList;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
     /// Giao diện dịch vụ đọc/ghi dữ liệu Checklist vào Named Object Dictionary của bản vẽ DWG.

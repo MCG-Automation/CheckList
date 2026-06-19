@@ -1,4 +1,4 @@
-namespace MCGCadPlugin.Models.CheckList
+namespace MCG_CheckList.Models.CheckList
 {
     /// <summary>
     /// Kết quả trả về sau khi đồng bộ tệp từ Vault Server.

@@ -8,10 +8,10 @@ using Autodesk.DataManagement.Client.Framework.Vault.Settings;
 using VDF = Autodesk.DataManagement.Client.Framework;
 using VltFormsSettings = Autodesk.DataManagement.Client.Framework.Vault.Forms.Settings;
 using VltFormsLib = Autodesk.DataManagement.Client.Framework.Vault.Forms.Library;
-using MCGCadPlugin.Models.CheckList;
-using MCGCadPlugin.Utilities;
+using MCG_CheckList.Models.CheckList;
+using MCG_CheckList.Utilities;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
     /// Dịch vụ kết nối và đồng bộ hóa tệp tin tự động từ Autodesk Vault Server.
@@ -254,7 +254,7 @@ namespace MCGCadPlugin.Services.CheckList
             {
                 try { Directory.CreateDirectory(fallbackFolder); }
                 catch {
-                    fallbackFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MCGCadPlugin", "Cache");
+                    fallbackFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MCG_CheckList", "Cache");
                     Directory.CreateDirectory(fallbackFolder);
                 }
             }

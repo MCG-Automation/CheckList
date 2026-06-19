@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using ExcelDataReader;
 using System.Reflection;
-using MCGCadPlugin.Models.CheckList;
-using MCGCadPlugin.Utilities;
+using MCG_CheckList.Models.CheckList;
+using MCG_CheckList.Utilities;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
     /// Bộ phân tích dữ liệu Excel Checklist mẫu cho MacGregor.

@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
-    /// Bộ quản lý các đường dẫn tệp tin và thư mục lưu trữ cache của MCGCadPlugin trong %APPDATA%
+    /// Bộ quản lý các đường dẫn tệp tin và thư mục lưu trữ cache của MCG_CheckList trong %APPDATA%
     /// </summary>
     public static class ChecklistAppDataPaths
     {
@@ -18,7 +18,7 @@ namespace MCGCadPlugin.Services.CheckList
             {
                 if (!string.IsNullOrEmpty(RootOverride)) return RootOverride;
                 var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                return Path.Combine(appData, "MCGCadPlugin");
+                return Path.Combine(appData, "MCG_CheckList");
             }
         }
 

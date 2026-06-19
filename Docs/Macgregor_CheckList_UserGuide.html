@@ -335,7 +335,7 @@
     <div class="data-flow">
       <div class="data-node primary">1️⃣ DWG file<br><span style="font-size:11px;font-weight:400;color:var(--muted);">Nhúng trong bản vẽ</span></div>
       <div class="data-arrow">→</div>
-      <div class="data-node">2️⃣ JSON local cache<br><span style="font-size:11px;font-weight:400;color:var(--muted);">%APPDATA%\MCGCadPlugin</span></div>
+      <div class="data-node">2️⃣ JSON local cache<br><span style="font-size:11px;font-weight:400;color:var(--muted);">%APPDATA%\MCG_CheckList</span></div>
       <div class="data-arrow">→</div>
       <div class="data-node">3️⃣ Excel template<br><span style="font-size:11px;font-weight:400;color:var(--muted);">Tải từ Vault</span></div>
       <div class="data-arrow">→</div>
@@ -522,7 +522,7 @@
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;">
       <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;flex:1;min-width:160px;">
         <strong style="color:var(--navy);">1. JSON local cache</strong><br>
-        <span style="color:var(--muted);font-size:12px;">%APPDATA%\MCGCadPlugin\</span>
+        <span style="color:var(--muted);font-size:12px;">%APPDATA%\MCG_CheckList\</span>
       </div>
       <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px 16px;font-size:13px;flex:1;min-width:160px;color:#15803d;">
         <strong>2. DWG file</strong><br>
@@ -701,7 +701,7 @@
         <li><strong>Đóng AutoCAD quá nhanh</strong> sau khi tick: debounce timer 500ms chưa kịp lưu. Trong tương lai hãy chờ 1 giây sau thao tác cuối trước khi đóng.</li>
         <li><strong>File DWG từ trước khi cài plugin</strong>: lần đầu mở bằng plugin, cần chọn lại loại bản vẽ từ dropdown. Sau đó dữ liệu được lưu và tự khôi phục từ lần sau.</li>
       </ul>
-      Kiểm tra JSON cache tại <span class="path">%APPDATA%\MCGCadPlugin\</span> — nếu file JSON vẫn còn, tool sẽ đọc từ đó khi không tìm thấy dữ liệu trong DWG.
+      Kiểm tra JSON cache tại <span class="path">%APPDATA%\MCG_CheckList\</span> — nếu file JSON vẫn còn, tool sẽ đọc từ đó khi không tìm thấy dữ liệu trong DWG.
     </div>
   </div>
 

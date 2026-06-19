@@ -6,14 +6,14 @@
     <Configurations>Debug;Release</Configurations>
     <LangVersion>9.0</LangVersion>
     <UseWPF>true</UseWPF>
-    <RootNamespace>MCGCadPlugin</RootNamespace>
+    <RootNamespace>MCG_CheckList</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <MSBuildWarningsAsMessages>MSB3061</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <BuildTimestamp>$([System.DateTime]::Now.ToString("yyyyMMdd_HHmmss"))</BuildTimestamp>
-    <AssemblyName>MCGCadPlugin_$(BuildTimestamp)</AssemblyName>
+    <AssemblyName>MCG_CheckList_$(BuildTimestamp)</AssemblyName>
   </PropertyGroup>
 
   <!-- Release: MCG_ prefix theo chuẩn MCGVN Installation Guide (DLL phải tên MCG_*.dll) -->
@@ -78,9 +78,9 @@
     <!-- Tạo thư mục bundle nếu chưa có -->
     <MakeDir Directories="$(BundleContents)" />
 
-    <!-- Xóa DLL cũ (MCGCadPlugin* và MCG_CadPlugin*) — ContinueOnError khi AutoCAD đang chạy -->
+    <!-- Xóa DLL cũ (MCG_CheckList* và MCG_CadPlugin*) — ContinueOnError khi AutoCAD đang chạy -->
     <ItemGroup>
-      <OldDlls Include="$(BundleContents)\MCGCadPlugin*.dll;$(BundleContents)\MCG_CadPlugin*.dll;$(BundleContents)\MCG_CheckList*.dll" />
+      <OldDlls Include="$(BundleContents)\MCG_CheckList*.dll;$(BundleContents)\MCG_CadPlugin*.dll;$(BundleContents)\MCG_CheckList*.dll" />
     </ItemGroup>
     <Delete Files="@(OldDlls)" ContinueOnError="true" />
 

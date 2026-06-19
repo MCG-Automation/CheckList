@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MCGCadPlugin.Models.CheckList
+namespace MCG_CheckList.Models.CheckList
 {
     // Đại diện cho 1 dòng (1 câu hỏi) trong Checklist
     public class ChecklistItem : INotifyPropertyChanged

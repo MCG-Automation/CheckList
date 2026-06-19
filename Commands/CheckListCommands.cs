@@ -3,7 +3,7 @@ using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
 using Exception = System.Exception;
 
-namespace MCGCadPlugin.Commands
+namespace MCG_CheckList.Commands
 {
     /// <summary>
     /// Đăng ký các lệnh AutoCAD cho module CheckList.

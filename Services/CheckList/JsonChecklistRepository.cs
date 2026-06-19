@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Newtonsoft.Json;
-using MCGCadPlugin.Models.CheckList;
+using MCG_CheckList.Models.CheckList;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
     /// Lớp hiện thực hóa kho lưu trữ JSON.

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using MCGCadPlugin.Models.CheckList;
+using MCG_CheckList.Models.CheckList;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
     /// Bộ điều phối trung tâm kết hợp nạp tệp Excel, đồng bộ Vault và đồng bộ bộ đệm JSON cục bộ.

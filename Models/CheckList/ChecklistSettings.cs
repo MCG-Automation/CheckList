@@ -1,6 +1,6 @@
 using System;
 
-namespace MCGCadPlugin.Models.CheckList
+namespace MCG_CheckList.Models.CheckList
 {
     /// <summary>
     /// Lớp đại diện cho cấu hình tệp settings.json của module QA/QC Checklist.

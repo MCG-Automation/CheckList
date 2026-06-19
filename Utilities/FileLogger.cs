@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 
-namespace MCGCadPlugin.Utilities
+namespace MCG_CheckList.Utilities
 {
     /// <summary>
-    /// Logger ghi ra file tai %APPDATA%\MCGCadPlugin\plugin.log.
+    /// Logger ghi ra file tai %APPDATA%\MCG_CheckList\plugin.log.
     /// Khong can quyen Administrator, thread-safe.
     /// Dung thay the/bo sung cho Debug.WriteLine khi can debug ma khong co DebugView.
     /// </summary>
@@ -25,7 +25,7 @@ namespace MCGCadPlugin.Utilities
             try
             {
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string logDir = Path.Combine(appDataPath, "MCGCadPlugin");
+                string logDir = Path.Combine(appDataPath, "MCG_CheckList");
                 if (!Directory.Exists(logDir))
                     Directory.CreateDirectory(logDir);
                 _logPath = Path.Combine(logDir, "plugin.log");
@@ -33,7 +33,7 @@ namespace MCGCadPlugin.Utilities
             catch
             {
                 // Fallback ve TEMP neu APPDATA khong accessible
-                _logPath = Path.Combine(Path.GetTempPath(), "MCGCadPlugin_plugin.log");
+                _logPath = Path.Combine(Path.GetTempPath(), "MCG_CheckList_plugin.log");
             }
         }
 

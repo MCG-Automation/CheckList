@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
     /// Dịch vụ trung gian quản lý và xử lý nạp dữ liệu cấu hình biểu mẫu Excel từ Vault.

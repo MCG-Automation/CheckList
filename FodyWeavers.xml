@@ -3,7 +3,7 @@
   <!-- 
     Costura sẽ tự động quét tất cả các PackageReference có Copy Local = True 
     (bao gồm Newtonsoft.Json, ExcelDataReader, ExcelDataReader.DataSet) 
-    và đóng gói nén trực tiếp vào file MCGCadPlugin.dll đầu ra.
+    và đóng gói nén trực tiếp vào file MCG_CheckList.dll đầu ra.
   -->
   <Costura />
 </Weavers>

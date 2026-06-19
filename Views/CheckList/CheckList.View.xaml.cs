@@ -11,11 +11,11 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
-using MCGCadPlugin.Models.CheckList;
-using MCGCadPlugin.Services.CheckList;
-using MCGCadPlugin.Utilities;
+using MCG_CheckList.Models.CheckList;
+using MCG_CheckList.Services.CheckList;
+using MCG_CheckList.Utilities;
 
-namespace MCGCadPlugin.Views.CheckList
+namespace MCG_CheckList.Views.CheckList
 {
     /// <summary>
     /// Code-behind của bảng điều khiển QaChecklistView (AutoCAD Palette Tab).
@@ -410,7 +410,7 @@ namespace MCGCadPlugin.Views.CheckList
                               $"The file was not found locally and no embedded fallback exists.\n\n" +
                               $"Solutions:\n" +
                               $"1. Connect to Vault (auto-sync on next open)\n" +
-                              $"2. Manually copy the Excel file to:\n   {MCGCadPlugin.Services.CheckList.ChecklistAppDataPaths.SharedTemplatePath}\n" +
+                              $"2. Manually copy the Excel file to:\n   {MCG_CheckList.Services.CheckList.ChecklistAppDataPaths.SharedTemplatePath}\n" +
                               $"3. (Dev) Add the Excel file to the project Resources/ folder and rebuild";
                 }
                 else
@@ -441,7 +441,7 @@ namespace MCGCadPlugin.Views.CheckList
             try
             {
                 // Truy cập Singleton PaletteManager để ẩn PaletteSet chính thức
-                MCGCadPlugin.Commands.PaletteManager.Instance?.Hide();
+                MCG_CheckList.Commands.PaletteManager.Instance?.Hide();
                 Debug.WriteLine($"{LOG_PREFIX} Đã ẩn PaletteSet thành công qua PaletteManager.");
             }
             catch (Exception ex)

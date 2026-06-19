@@ -1,4 +1,4 @@
-# CLAUDE.md — MCGCadPlugin
+# CLAUDE.md — MCG_CheckList
 
 # AutoCAD 2023 | C# | .NET Framework 4.8 | WPF | VS Code
 
@@ -22,9 +22,9 @@ Sau khi đọc xong, **báo cáo ngắn**:
 ## 2. Thông tin dự án
 
 ```
-Tên project   : MCGCadPlugin
+Tên project   : MCG_CheckList
 Mục tiêu      : Plugin AutoCAD .NET API để bóc tách dữ liệu hình học (MTO)
-Thư mục chuẩn : C:\CustomTools\Autocad\MCGCadPlugin
+Thư mục chuẩn : C:\CustomTools\Autocad\MCG_CheckList
 Runtime        : .NET Framework 4.8, x64
 UI             : WPF + AutoCAD PaletteSet (Singleton)
 API DLLs       : C:\Program Files\Autodesk\AutoCAD 2023\acmgd.dll
@@ -35,30 +35,30 @@ Bundle folder  : %PROGRAMDATA%\Autodesk\ApplicationPlugins\
 Build          : dotnet build -c Debug (chạy với quyền Administrator)
 ```
 
-> ⚠️ **Hạn chế chỉnh sửa `MCGCadPlugin.csproj`** — chỉ sửa khi có lý do rõ ràng (đổi `PluginName`, thêm `PackageReference`, đổi target framework). Không chạm các field không hiểu rõ.
+> ⚠️ **Hạn chế chỉnh sửa `MCG_CheckList.csproj`** — chỉ sửa khi có lý do rõ ràng (đổi `PluginName`, thêm `PackageReference`, đổi target framework). Không chạm các field không hiểu rõ.
 
 ---
 
 ## 3. Namespace — BẮT BUỘC TUÂN THỦ
 
 ```
-MCGCadPlugin                                    ← Root
-├── MCGCadPlugin.Commands                       ← Đăng ký lệnh CommandMethod (chỉ PaletteManager)
-├── MCGCadPlugin.Models                         ← Data objects thuần, không import AutoCAD
-│   └── MCGCadPlugin.Models.CheckList
-├── MCGCadPlugin.Services                       ← Business logic, luôn có Interface
-│   └── MCGCadPlugin.Services.CheckList
-├── MCGCadPlugin.Views                          ← WPF XAML + code-behind tối thiểu
-│   └── MCGCadPlugin.Views.CheckList
-└── MCGCadPlugin.Utilities                      ← Hàm dùng chung toàn project
+MCG_CheckList                                    ← Root
+├── MCG_CheckList.Commands                       ← Đăng ký lệnh CommandMethod (chỉ PaletteManager)
+├── MCG_CheckList.Models                         ← Data objects thuần, không import AutoCAD
+│   └── MCG_CheckList.Models.CheckList
+├── MCG_CheckList.Services                       ← Business logic, luôn có Interface
+│   └── MCG_CheckList.Services.CheckList
+├── MCG_CheckList.Views                          ← WPF XAML + code-behind tối thiểu
+│   └── MCG_CheckList.Views.CheckList
+└── MCG_CheckList.Utilities                      ← Hàm dùng chung toàn project
 ```
 
 **Quy tắc namespace theo vị trí file:**
 ```
-Models/CheckList/CheckList.Models.cs                 → namespace MCGCadPlugin.Models.CheckList
-Services/CheckList/ChecklistService.cs               → namespace MCGCadPlugin.Services.CheckList
-Views/CheckList/CheckList.View.xaml.cs               → namespace MCGCadPlugin.Views.CheckList
-Utilities/FileLogger.cs                              → namespace MCGCadPlugin.Utilities
+Models/CheckList/CheckList.Models.cs                 → namespace MCG_CheckList.Models.CheckList
+Services/CheckList/ChecklistService.cs               → namespace MCG_CheckList.Services.CheckList
+Views/CheckList/CheckList.View.xaml.cs               → namespace MCG_CheckList.Views.CheckList
+Utilities/FileLogger.cs                              → namespace MCG_CheckList.Utilities
 ```
 
 ---
@@ -322,7 +322,7 @@ Mỗi layer có folder `_Template/` chứa file mẫu. Khi tạo Module mới, *
 
 ```csharp
 // File: Services/Module1/TenService.cs
-namespace MCGCadPlugin.Services.Module1
+namespace MCG_CheckList.Services.Module1
 {
     /// <summary>
     /// TODO: Mô tả class này làm gì

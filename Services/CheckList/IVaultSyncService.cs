@@ -1,6 +1,6 @@
-using MCGCadPlugin.Models.CheckList;
+using MCG_CheckList.Models.CheckList;
 
-namespace MCGCadPlugin.Services.CheckList
+namespace MCG_CheckList.Services.CheckList
 {
     /// <summary>
     /// Giao diện dịch vụ tương tác với Autodesk Vault API để tải và đồng bộ các tệp tin Excel Checklist.
