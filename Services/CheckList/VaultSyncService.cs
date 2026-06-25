@@ -144,7 +144,6 @@ namespace MCG_CheckList.Services.CheckList
                 // Thực thi tải file từ Vault
                 connection.FileManager.AcquireFiles(acquireSettings);
 
-                settings.LastExcelFolder = localWorkingFolder;
                 Debug.WriteLine($"{LOG_PREFIX} Get Latest THÀNH CÔNG: {finalLocalFilePath}");
                 return new VaultSyncResult
                 {
