@@ -95,14 +95,23 @@ namespace MCG_CheckList.Commands
             else Show();
         }
 
+        /// <summary>
+        /// Ẩn PaletteSet nếu đã được khởi tạo — dùng bởi PluginEntry.OnBeginQuit.
+        /// Không làm gì nếu palette chưa từng được tạo (user chưa gõ lệnh).
+        /// </summary>
+        public void HideIfInitialized()
+        {
+            if (IsInitialized)
+            {
+                _paletteSet.Visible = false;
+                Debug.WriteLine($"{LOG_PREFIX} BeginQuit: palette đã ẩn.");
+            }
+        }
+
         #endregion
 
         #region Private Methods
 
-        /// <summary>
-        /// Khởi tạo PaletteSet và tab CheckList.
-        /// Chỉ chạy 1 lần duy nhất trong vòng đời plugin.
-        /// </summary>
         private void Initialize()
         {
             Debug.WriteLine($"{LOG_PREFIX} Bắt đầu khởi tạo PaletteSet...");
@@ -118,7 +127,9 @@ namespace MCG_CheckList.Commands
             _paletteSet.DockEnabled = DockSides.Right;
             _paletteSet.Size = new Size(400, 600);
             _paletteSet.Style = PaletteSetStyles.ShowTabForSingle
-                              | PaletteSetStyles.Snappable;
+                              | PaletteSetStyles.Snappable
+                              | PaletteSetStyles.ShowAutoHideButton
+                              | PaletteSetStyles.ShowCloseButton;
             _paletteSet.KeepFocus = true;
 
             // 4. Override GUID session restore — AutoCAD tự động set Visible=true cho PaletteSet

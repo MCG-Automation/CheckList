@@ -26,7 +26,11 @@
       "Read(//c/Users/truonph/AppData/Roaming/MCG_CheckList/**)",
       "Read(//g/My Drive/4. Code/MCG/Inventor/MCG_PickPartData/**)",
       "Read(//g/My Drive/4. Code/MCG/Inventor/**)",
-      "Bash(powershell -command \"[guid]::NewGuid\\(\\).ToString\\(\\)\")"
+      "Bash(powershell -command \"[guid]::NewGuid\\(\\).ToString\\(\\)\")",
+      "Bash(cmd //c \"dir \\\\\"%PROGRAMDATA%\\\\\\\\Autodesk\\\\\\\\ApplicationPlugins\\\\\\\\MCG_Plugin.bundle\\\\\\\\Contents\\\\\"\")",
+      "Read(//c/ProgramData/Autodesk/ApplicationPlugins/MCG_Plugin.bundle/Contents/**)",
+      "Bash(powershell -Command 'Get-Item '\\\\''C:\\\\ProgramData\\\\Autodesk\\\\ApplicationPlugins\\\\MCG_Plugin.bundle\\\\Contents\\\\MCG_CheckList.dll'\\\\'' | Select-Object Name, LastWriteTime, @{N='\\\\''Size\\(KB\\)'\\\\'';E={[math]::Round\\($_.Length/1KB,1\\)}}')",
+      "Bash(cmd //c \"dir \\\\\"C:\\\\\\\\ProgramData\\\\\\\\Autodesk\\\\\\\\ApplicationPlugins\\\\\\\\MCG_Plugin.bundle\\\\\\\\Contents\\\\\"\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\TRANTH\\AppData\\Local\\Temp\\probe4"
