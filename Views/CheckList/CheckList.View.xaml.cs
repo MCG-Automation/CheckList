@@ -260,8 +260,32 @@ namespace MCG_CheckList.Views.CheckList
             CboDiscipline.SelectedItem = matchedItem; // null nếu file thủ công, không sao
             _suppressSelectionChanged = false;
 
-            // Load checklist — DWG data sẽ được dùng tự động qua carry-over trong orchestrator
-            await LoadChecklistFileAsync(dwgDoc.ExcelFileName, useVault: true);
+            // Restore trực tiếp từ DWG — không cần Excel template, không cần Vault
+            // DWG XRecord đã có toàn bộ data (items + checked state + approval status)
+            RestoreFromDwg(dwgDoc);
+        }
+
+        /// <summary>
+        /// Khôi phục giao diện trực tiếp từ dữ liệu DWG — bỏ qua Excel và Vault.
+        /// Dùng khi bản vẽ đã từng lưu checklist vào XRecord.
+        /// </summary>
+        private void RestoreFromDwg(ChecklistDocument dwgDoc)
+        {
+            if (ChecklistItems != null)
+                foreach (var item in ChecklistItems)
+                    item.PropertyChanged -= Item_PropertyChanged;
+
+            Document       = dwgDoc;
+            ChecklistItems = new ObservableCollection<ChecklistItem>(dwgDoc.Items ?? new System.Collections.Generic.List<ChecklistItem>());
+
+            foreach (var item in ChecklistItems)
+                item.PropertyChanged += Item_PropertyChanged;
+
+            SyncStatusText  = "Restored from DWG";
+            SyncStatusColor = Brushes.SteelBlue;
+            UpdateProgress();
+
+            Debug.WriteLine($"{LOG_PREFIX} Khôi phục trực tiếp từ DWG: {ChecklistItems.Count} items, Status={dwgDoc.Status}");
         }
         #endregion
 
